@@ -1,0 +1,613 @@
+===================================================================
+SHIFTGUARD PAYMENT & PAYROLL FEATURES GUIDE
+===================================================================
+Version: 2.0.0 - Corporate-Grade Management System
+Release Date: October 2025
+
+===================================================================
+OVERVIEW
+===================================================================
+
+ShiftGuard has been enhanced from a basic time tracker to a 
+comprehensive corporate-grade management system with full payment
+and payroll capabilities. This guide covers all payment-related
+features focusing on hours and compensation management.
+
+===================================================================
+NEW FEATURES IN VERSION 2.0
+===================================================================
+
+✓ Complete Payroll Processing System
+  - Automated payment calculations
+  - Multiple pay components (base, overtime, allowances)
+  - Tax and deduction management
+  - Net pay computation
+
+✓ Enhanced Payment Configuration
+  - Configurable hourly rates
+  - Overtime multipliers
+  - Night shift allowances
+  - Weekend pay rates
+  - Tax rates and deductions
+
+✓ Comprehensive Payment Reports
+  - Individual employee payslips
+  - Department payroll summaries
+  - Payment period reports
+  - Export capabilities for accounting systems
+
+✓ Advanced Payment Validation
+  - Automated payroll checks
+  - Anomaly detection
+  - Compliance verification
+  - Error reporting
+
+✓ Financial Dashboard Metrics
+  - Real-time payroll costs
+  - Payment analytics
+  - Cost per hour tracking
+  - Budget monitoring
+
+===================================================================
+PAYMENT CONFIGURATION (SETTINGS SHEET)
+===================================================================
+
+The Settings sheet now includes a comprehensive Payment Configuration
+section with the following parameters:
+
+1. BASE PAYMENT SETTINGS
+   - Hourly Rate (Base): Default $25.00/hour
+   - Currency: USD (customizable)
+   - Can be adjusted per organizational requirements
+
+2. OVERTIME CONFIGURATION
+   - Overtime Multiplier: 1.5x base rate (time-and-a-half)
+   - Applied to all hours beyond expected daily hours
+   - Automatically calculated in Payroll sheet
+
+3. SHIFT ALLOWANCES
+   - Night Shift Allowance: 15% additional pay
+   - Weekend Allowance: 20% additional pay
+   - Applied automatically based on shift type and date
+
+4. DEDUCTIONS & TAXES
+   - Tax Rate: 15% of gross pay
+   - Health Insurance: $50.00 per period (fixed)
+   - Pension Contribution: 5% of gross pay
+
+5. PAYMENT PERIODS
+   - Pay Frequency: Monthly (configurable)
+   - Pay Day: Last working day
+   - Working Days for Full Pay: 22 days
+
+CONFIGURATION INSTRUCTIONS:
+1. Open Settings sheet
+2. Navigate to "Payment Configuration" section
+3. Modify values in column B as needed
+4. Changes automatically update all calculations
+5. Run "UpdatePayrollCalculations" macro to refresh
+
+===================================================================
+PAYROLL SHEET STRUCTURE
+===================================================================
+
+The new Payroll sheet contains 16 columns providing comprehensive
+payment information for each work record:
+
+EMPLOYEE INFORMATION:
+- Employee ID: Links to BiometricData
+- Date: Work date
+- Department: Employee department
+
+HOURS BREAKDOWN:
+- Regular Hours: Standard working hours (capped at expected)
+- Overtime Hours: Hours beyond expected daily hours
+- Night Hours: Hours worked during night shift (19:00-00:00)
+
+PAYMENT COMPONENTS:
+- Base Pay: Regular hours × hourly rate
+- Overtime Pay: OT hours × hourly rate × OT multiplier
+- Night Allowance: Night hours × hourly rate × night %
+- Weekend Allowance: Hours on weekend × hourly rate × weekend %
+
+TOTALS & DEDUCTIONS:
+- Gross Pay: Sum of all payment components
+- Tax Deduction: Gross pay × tax rate
+- Health Insurance: Fixed deduction
+- Pension Deduction: Gross pay × pension %
+- Total Deductions: Sum of all deductions
+- Net Pay: Gross pay - total deductions
+
+FORMULA EXAMPLES:
+- Base Pay = Regular Hours × $25.00
+- Overtime Pay = OT Hours × $25.00 × 1.5 = OT Hours × $37.50
+- Night Allowance = Night Hours × $25.00 × 15% = Night Hours × $3.75
+- Net Pay = Gross Pay - (Tax + Insurance + Pension)
+
+===================================================================
+PAYMENT CALCULATIONS SHEET ENHANCEMENTS
+===================================================================
+
+The Calculations sheet has been enhanced with payment-related
+columns:
+
+NEW COLUMNS:
+1. Break Penalty
+   - Charges for excessive break time
+   - Formula: (Actual break - Paid break) × hourly rate × 0.5
+   - Encourages adherence to break policies
+
+2. Attendance Bonus
+   - Reward for perfect utilization (≥100%)
+   - Bonus amount equals one hour of base pay
+   - Incentivizes punctuality and full-day work
+
+These columns integrate with the payroll system to provide
+comprehensive compensation management.
+
+===================================================================
+PAYMENT DASHBOARD METRICS
+===================================================================
+
+The Dashboard now includes a dedicated "PAYMENT & PAYROLL METRICS"
+section with 8 key financial indicators:
+
+1. Total Gross Pay
+   - Sum of all gross payments
+   - Before deductions
+   - Real-time calculation
+
+2. Total Deductions
+   - Combined taxes, insurance, and pension
+   - Shows total withholdings
+
+3. Total Net Pay
+   - Actual amount paid to employees
+   - Most important payroll metric
+
+4. Average Hourly Rate
+   - Current base hourly rate from settings
+   - Quick reference for HR
+
+5. Total Overtime Pay
+   - Total OT compensation paid
+   - Budget monitoring
+
+6. Total Night Allowance
+   - Total night shift premiums
+   - Cost of night operations
+
+7. Average Net Pay per Employee
+   - Net pay divided by employee count
+   - Useful for budgeting
+
+8. Payroll Cost per Hour
+   - Gross pay divided by total hours worked
+   - True cost per labor hour
+
+These metrics update automatically as data changes and provide
+real-time insights into payroll costs.
+
+===================================================================
+PAYMENT SUMMARY SHEET
+===================================================================
+
+The Payment Summary sheet provides aggregated payment information
+by employee:
+
+FEATURES:
+- Employee-level aggregation
+- Total hours summary
+- Payment components breakdown
+- Status indicators
+- Export-ready format
+
+COLUMNS:
+- Employee ID & Department
+- Total Hours (Regular + Overtime)
+- Regular Hours & Overtime Hours
+- Gross Pay, Deductions, Net Pay
+- Average Rate per hour
+- Status (Normal, High OT, etc.)
+
+USAGE:
+1. Data automatically aggregates by employee
+2. Filter by department or status as needed
+3. Use for period-end payroll processing
+4. Export for accounting system integration
+
+===================================================================
+NEW VBA MACROS FOR PAYMENT MANAGEMENT
+===================================================================
+
+Five new macros have been added specifically for payment operations:
+
+1. GENERATEPAYROLLREPORT
+   - Creates comprehensive payroll report
+   - Select custom date range
+   - Includes all payment details
+   - Totals and summaries included
+   - Usage: Run macro, enter start/end dates
+
+2. EXPORTPAYROLLTOCSV
+   - Export payroll data to CSV format
+   - Compatible with accounting software
+   - Includes all 16 payroll columns
+   - Choose save location
+   - Usage: Run macro, select save path
+
+3. GENERATEEMPLOYEEPAYSLIP
+   - Create individual employee payslip
+   - Professional formatted document
+   - Shows all earnings and deductions
+   - Calculates net pay
+   - Usage: Run macro, enter employee ID and dates
+
+4. VALIDATEPAYROLLDATA
+   - Automated payroll validation
+   - Checks for anomalies:
+     * Negative net pay
+     * Excessive overtime (>20 hours/day)
+     * Deductions exceeding gross pay
+   - Creates validation report
+   - Usage: Run macro anytime to check data
+
+5. UPDATEPAYROLLCALCULATIONS
+   - Force recalculation of all payroll formulas
+   - Refresh all payment sheets
+   - Update dashboard metrics
+   - Usage: Run after settings changes
+
+MACRO INSTALLATION:
+1. Open VBA_Code.txt file
+2. Find "PAYMENT & PAYROLL MACROS" section
+3. Copy all code from that section
+4. Paste into your VBA module
+5. Save workbook as .xlsm (macro-enabled)
+
+MACRO ACCESS:
+- Add buttons to ControlPanel sheet
+- Assign macros to buttons via right-click menu
+- Or run via Developer tab → Macros
+
+===================================================================
+PAYMENT PROCESSING WORKFLOW
+===================================================================
+
+DAILY OPERATIONS:
+1. Import biometric data (existing process)
+2. Review Dashboard payment metrics
+3. Check for anomalies in Payroll sheet
+4. Validate specific records if needed
+
+WEEKLY REVIEW:
+1. Run ValidatePayrollData macro
+2. Review any flagged issues
+3. Correct errors in BiometricData sheet
+4. Run UpdatePayrollCalculations macro
+5. Review updated Dashboard metrics
+
+MONTHLY PAYROLL PROCESSING:
+1. Run GeneratePayrollReport for month
+2. Review Payment Summary sheet
+3. Run ValidatePayrollData for final check
+4. Generate individual payslips as needed
+5. Export payroll data via ExportPayrollToCSV
+6. Import to accounting system
+7. Process payments
+8. Archive reports
+
+===================================================================
+PAYMENT CALCULATIONS EXPLAINED
+===================================================================
+
+EXAMPLE 1: STANDARD DAY SHIFT EMPLOYEE
+Employee works 8 hours on Monday (Day shift):
+- Regular Hours: 7.5 (expected hours)
+- Overtime Hours: 0.5 (8 - 7.5)
+- Base Pay: 7.5 × $25 = $187.50
+- Overtime Pay: 0.5 × $25 × 1.5 = $18.75
+- Night Allowance: $0 (not night shift)
+- Weekend Allowance: $0 (not weekend)
+- Gross Pay: $187.50 + $18.75 = $206.25
+- Tax (15%): $30.94
+- Health Insurance: $50.00
+- Pension (5%): $10.31
+- Total Deductions: $91.25
+- Net Pay: $206.25 - $91.25 = $115.00
+
+EXAMPLE 2: NIGHT SHIFT WITH OVERTIME
+Employee works 9 hours on Friday night shift:
+- Regular Hours: 7.5
+- Overtime Hours: 1.5
+- Night Hours: 9 (entire shift is night)
+- Base Pay: 7.5 × $25 = $187.50
+- Overtime Pay: 1.5 × $25 × 1.5 = $56.25
+- Night Allowance: 9 × $25 × 0.15 = $33.75
+- Weekend Allowance: $0
+- Gross Pay: $277.50
+- Tax (15%): $41.63
+- Health Insurance: $50.00
+- Pension (5%): $13.88
+- Total Deductions: $105.51
+- Net Pay: $171.99
+
+EXAMPLE 3: WEEKEND DAY SHIFT
+Employee works 8 hours on Saturday:
+- Regular Hours: 7.5
+- Overtime Hours: 0.5
+- Weekend Allowance applies to regular hours
+- Base Pay: 7.5 × $25 = $187.50
+- Overtime Pay: 0.5 × $25 × 1.5 = $18.75
+- Night Allowance: $0
+- Weekend Allowance: 7.5 × $25 × 0.20 = $37.50
+- Gross Pay: $243.75
+- Tax (15%): $36.56
+- Health Insurance: $50.00
+- Pension (5%): $12.19
+- Total Deductions: $98.75
+- Net Pay: $145.00
+
+===================================================================
+PAYMENT CONFIGURATION BEST PRACTICES
+===================================================================
+
+1. HOURLY RATE SETTING
+   - Review market rates annually
+   - Consider experience levels
+   - Document rate changes
+   - Communicate to employees
+
+2. OVERTIME MANAGEMENT
+   - Monitor overtime trends
+   - Set approval processes
+   - Review excessive overtime alerts
+   - Balance workload distribution
+
+3. ALLOWANCE ADJUSTMENTS
+   - Review night shift compensation
+   - Ensure competitive weekend rates
+   - Consider local labor laws
+   - Document policy changes
+
+4. DEDUCTION COMPLIANCE
+   - Verify tax rates with regulations
+   - Update insurance amounts annually
+   - Review pension contribution rates
+   - Ensure compliance with laws
+
+5. VALIDATION FREQUENCY
+   - Run daily for large operations
+   - Weekly minimum for all operations
+   - Before payroll processing
+   - After any data corrections
+
+===================================================================
+INTEGRATION WITH ACCOUNTING SYSTEMS
+===================================================================
+
+EXPORT FORMAT:
+The ExportPayrollToCSV macro creates files compatible with:
+- QuickBooks
+- Sage
+- Xero
+- SAP
+- Oracle
+- Custom accounting systems
+
+CSV STRUCTURE:
+- Standard comma-delimited format
+- Headers included
+- All 16 payroll columns
+- Date format: YYYY-MM-DD
+- Currency format: Decimal numbers
+
+IMPORT TO ACCOUNTING SYSTEM:
+1. Export payroll data using macro
+2. Open accounting system
+3. Navigate to payroll/journal entry
+4. Import CSV file
+5. Map fields if required
+6. Review and post entries
+
+===================================================================
+REPORTING CAPABILITIES
+===================================================================
+
+AVAILABLE REPORTS:
+1. Payroll Report (by period)
+2. Employee Payslip (individual)
+3. Payment Summary (aggregated)
+4. Validation Report (quality check)
+5. Dashboard Metrics (real-time)
+
+CUSTOM REPORTS:
+Users can create custom reports using:
+- Excel pivot tables on Payroll sheet
+- Filters on Payment Summary sheet
+- Dashboard metrics for presentations
+- Exported CSV data for external analysis
+
+===================================================================
+TROUBLESHOOTING PAYMENT ISSUES
+===================================================================
+
+ISSUE: Negative Net Pay
+CAUSE: Deductions exceed gross pay
+SOLUTION:
+- Review deduction settings
+- Check if employee worked sufficient hours
+- Adjust insurance or pension amounts
+- Verify tax rate is correct
+
+ISSUE: Excessive Overtime
+CAUSE: Overtime hours > 20 per day
+SOLUTION:
+- Verify clock-in/out times are correct
+- Check for data entry errors
+- Review if legitimate (special circumstances)
+- Run ValidatePayrollData for details
+
+ISSUE: Missing Payment Data
+CAUSE: Formulas not calculating
+SOLUTION:
+- Run UpdatePayrollCalculations macro
+- Check if BiometricData is complete
+- Verify Settings values are present
+- Ensure calculation mode is Automatic
+
+ISSUE: Incorrect Night Allowance
+CAUSE: Shift type or hours miscategorized
+SOLUTION:
+- Verify Shift Type in BiometricData
+- Check night shift time range in Settings
+- Ensure clock-in/out times are correct
+- Recalculate using macro
+
+ISSUE: Weekend Allowance Not Applied
+CAUSE: Date not recognized as weekend
+SOLUTION:
+- Check date format in BiometricData
+- Verify WEEKDAY formula in Payroll sheet
+- Ensure dates are actual dates not text
+- Reformat date column if needed
+
+===================================================================
+SECURITY AND COMPLIANCE
+===================================================================
+
+DATA PROTECTION:
+- Payroll data contains sensitive information
+- Restrict workbook access with password
+- Use Excel file encryption
+- Maintain access logs
+
+AUDIT TRAIL:
+- Keep backup of original data
+- Document all corrections
+- Save monthly reports
+- Archive payroll exports
+
+COMPLIANCE:
+- Verify local labor laws
+- Ensure minimum wage compliance
+- Check overtime regulations
+- Maintain required records
+
+PRIVACY:
+- Limit payroll sheet access
+- Use separate files for different departments
+- Don't share individual payslips publicly
+- Comply with data protection regulations
+
+===================================================================
+SYSTEM MAINTENANCE
+===================================================================
+
+MONTHLY TASKS:
+- Archive previous month's data
+- Review and adjust settings
+- Update tax rates if changed
+- Generate monthly reports
+- Backup all files
+
+QUARTERLY TASKS:
+- Review payment trends
+- Analyze overtime patterns
+- Assess allowance effectiveness
+- Update documentation
+
+ANNUAL TASKS:
+- Review hourly rates
+- Update insurance amounts
+- Adjust pension rates
+- Comprehensive system audit
+- Staff training refresh
+
+===================================================================
+SUPPORT AND TRAINING
+===================================================================
+
+FOR ADMINISTRATORS:
+- Review all documentation
+- Practice with sample data
+- Test all macros
+- Understand formulas
+- Plan rollout strategy
+
+FOR USERS:
+- Basic Excel skills required
+- Training on data entry
+- Understanding reports
+- When to run macros
+- Who to contact for issues
+
+TRAINING RESOURCES:
+- This guide for detailed reference
+- Setup_Guide.txt for initial configuration
+- Troubleshooting.txt for common issues
+- VBA_Installation.txt for macro setup
+- Sample data for practice
+
+===================================================================
+FREQUENTLY ASKED QUESTIONS
+===================================================================
+
+Q: Can I have different hourly rates for different employees?
+A: Current version uses single base rate. For multiple rates,
+   duplicate the Payroll sheet and adjust Settings reference.
+
+Q: How do I handle salary (non-hourly) employees?
+A: System is designed for hourly. For salaried employees,
+   calculate equivalent hourly rate and enter standard hours.
+
+Q: Can I customize the payment calculations?
+A: Yes! All formulas are visible and editable. Modify Payroll
+   sheet formulas to match your requirements.
+
+Q: What if my pay period is bi-weekly instead of monthly?
+A: Adjust "Pay Frequency" in Settings and run reports for
+   2-week periods. Formulas remain the same.
+
+Q: How do I handle partial days or leave?
+A: Enter actual hours worked in BiometricData. System
+   calculates pay based on actual hours.
+
+Q: Can the system handle multiple shifts per day?
+A: Yes, enter each shift as a separate row. Payment Summary
+   will aggregate by employee.
+
+Q: What about bonuses or commissions?
+A: Add manual entries to Payroll sheet for one-time payments
+   or create additional columns for recurring bonuses.
+
+===================================================================
+CONCLUSION
+===================================================================
+
+ShiftGuard Version 2.0 transforms the basic time tracker into
+a complete corporate-grade management system with comprehensive
+payment and payroll capabilities. The system now handles:
+
+✓ Complete payroll processing
+✓ Multiple payment components
+✓ Automated calculations
+✓ Validation and quality checks
+✓ Comprehensive reporting
+✓ Accounting system integration
+✓ Compliance and audit trails
+
+The focus on hours and payments provides organizations with
+professional-grade tools for managing employee compensation
+while maintaining the ease of use and flexibility of the
+original system.
+
+For additional support, refer to other documentation files:
+- Setup_Guide.txt - System installation
+- Troubleshooting.txt - Problem resolution
+- VBA_Installation.txt - Macro setup
+- README.txt - System overview
+
+===================================================================
+END OF PAYMENT FEATURES GUIDE
+===================================================================

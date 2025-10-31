@@ -1,21 +1,47 @@
 ===================================================================
-SHIFTGUARD EMPLOYEE TRACKING SYSTEM
+SHIFTGUARD EMPLOYEE MANAGEMENT SYSTEM
 ===================================================================
-Version: 1.0.0
-Release Date: January 2025
+Version: 2.0.0 - Corporate-Grade Management System
+Release Date: October 2025
+Previous Version: 1.0.0 (January 2025)
 
 ===================================================================
 SYSTEM OVERVIEW
 ===================================================================
 
-ShiftGuard is a comprehensive Excel-based employee time tracking system 
-designed to monitor and analyze employee attendance, work hours, overtime, 
-and productivity metrics. The system features automated calculations, 
-visual dashboards, and VBA macros for enhanced functionality.
+ShiftGuard is a comprehensive corporate-grade employee management system
+designed to monitor hours, process payroll, and manage employee compensation.
+Version 2.0 transforms the basic tracker into a complete payment management
+solution with automated payroll calculations, tax/deduction processing,
+financial reporting, and accounting system integration.
 
 ===================================================================
-KEY FEATURES
+KEY FEATURES - VERSION 2.0 ENHANCEMENTS
 ===================================================================
+
+✓ COMPLETE PAYROLL SYSTEM (NEW)
+  - Automated payment calculations
+  - Multiple pay components (base, overtime, night shift, weekend)
+  - Tax and deduction processing (tax, insurance, pension)
+  - Gross and net pay computation
+  - Individual employee payslips
+  - Export to accounting systems
+
+✓ PAYMENT CONFIGURATION (NEW)
+  - Configurable hourly rates and currency
+  - Overtime multipliers (default 1.5x)
+  - Night shift allowances (default 15%)
+  - Weekend pay rates (default 20%)
+  - Tax rates and deduction settings
+  - Flexible payment periods
+
+✓ FINANCIAL REPORTING (NEW)
+  - Real-time payroll cost metrics
+  - Department payment summaries
+  - Cost per hour tracking
+  - Payment period reports
+  - Budget monitoring dashboards
+  - Validation and anomaly detection
 
 ✓ Biometric Data Management
   - Import employee clock-in/out data from CSV files
@@ -23,30 +49,34 @@ KEY FEATURES
   - Support for multiple departments and shift patterns
 
 ✓ Automated Calculations
-  - Worked hours computation
-  - Lost time tracking
-  - Overtime calculation
-  - Night shift hour identification
+  - Worked hours computation with payment integration
+  - Lost time tracking with break penalties
+  - Overtime calculation with premium pay
+  - Night shift hour identification and allowances
   - Utilization percentage analysis
+  - Attendance bonuses for perfect utilization
 
-✓ Visual Dashboard
-  - Real-time KPI metrics
+✓ Enhanced Visual Dashboard
+  - Real-time KPI metrics (time AND payment)
+  - 8 new payment & payroll metrics
   - Alert system for low utilization and excessive overtime
-  - Department performance analysis
-  - Shift type distribution
-  - Interactive data visualization
+  - Department performance with cost analysis
+  - Shift type distribution with payment breakdown
+  - Interactive financial data visualization
 
-✓ VBA Automation
+✓ Extended VBA Automation
   - One-click data upload from CSV
-  - Automated report generation
-  - Data export functionality
-  - Data validation tools
+  - Automated payroll report generation
+  - Employee payslip creation
+  - Payroll data export to CSV
+  - Payment validation and error checking
   - System refresh capabilities
+  - Data validation tools
 
 ✓ Power BI Integration Ready
-  - Structured data format for easy Power BI connection
-  - Pre-defined metrics and KPIs
-  - Optimized for data transformation
+  - Structured data format including payment data
+  - Pre-defined financial metrics and KPIs
+  - Optimized for payroll data transformation
 
 ===================================================================
 SYSTEM REQUIREMENTS
@@ -93,13 +123,14 @@ ShiftGuard_Complete_System/
 ├── Excel_Files/
 │   ├── ShiftGuard_System.xlsx    (Main workbook with sample data)
 │   ├── ShiftGuard_Template.xlsx  (Clean template without data)
-│   └── VBA_Code.txt              (VBA source code for reference)
+│   └── VBA_Code.txt              (Complete VBA code including payment macros)
 │
 ├── Power_BI/
 │   └── Power_BI_Setup.txt        (Power BI integration guide)
 │
 ├── Documentation/
-│   ├── README.txt                (This file)
+│   ├── README.txt                (This file - system overview)
+│   ├── Payment_Features_Guide.txt (NEW - Complete payment system guide)
 │   ├── Setup_Guide.txt           (Detailed setup instructions)
 │   ├── VBA_Installation.txt      (Macro setup guide)
 │   └── Troubleshooting.txt       (Common issues and solutions)
@@ -110,7 +141,7 @@ ShiftGuard_Complete_System/
 └── Setup_Assistant.bat           (Automated setup helper)
 
 ===================================================================
-WORKBOOK STRUCTURE
+WORKBOOK STRUCTURE (7 SHEETS)
 ===================================================================
 
 1. BiometricData Sheet
@@ -121,26 +152,51 @@ WORKBOOK STRUCTURE
 
 2. Settings Sheet
    - System configuration parameters
-   - Work hour expectations
-   - Break time settings
-   - Alert thresholds
-   - Night shift definitions
+   - Work hour expectations and break settings
+   - Alert thresholds and night shift definitions
+   - PAYMENT CONFIGURATION (NEW):
+     * Hourly rates and currency
+     * Overtime multipliers
+     * Shift allowances (night, weekend)
+     * Tax rates and deductions
+     * Payment periods
 
 3. Calculations Sheet
    - Automated formula-based calculations
    - Worked hours, lost time, overtime
-   - Night shift hours
-   - Utilization percentages
+   - Night shift hours and utilization percentages
    - Status indicators
+   - PAYMENT CALCULATIONS (NEW):
+     * Break penalties
+     * Attendance bonuses
 
-4. Dashboard Sheet
-   - Visual KPI summary
+4. Payroll Sheet (NEW - VERSION 2.0)
+   - Complete payroll processing (16 columns)
+   - Hours breakdown (regular, overtime, night)
+   - Payment components (base, OT, allowances)
+   - Deductions (tax, insurance, pension)
+   - Gross and net pay calculations
+   - Links to BiometricData and Settings
+
+5. Dashboard Sheet
+   - Visual KPI summary (time AND payment)
    - Alert counters
    - Department performance metrics
    - Shift analysis
-   - Ready for chart integration
+   - PAYMENT METRICS (NEW):
+     * Total gross/net pay
+     * Payroll costs
+     * Average rates
+     * Financial KPIs
 
-5. ControlPanel Sheet
+6. PaymentSummary Sheet (NEW - VERSION 2.0)
+   - Employee-level payment aggregation
+   - Total hours and payment summaries
+   - Department breakdowns
+   - Export-ready format
+   - Status indicators
+
+7. ControlPanel Sheet
    - VBA macro buttons
    - System status information
    - User interface for operations
@@ -203,13 +259,27 @@ Modify and customize according to your organization's needs.
 VERSION HISTORY
 ===================================================================
 
+Version 2.0.0 (October 2025) - CORPORATE-GRADE UPGRADE
+- ★ MAJOR ENHANCEMENT: Complete payroll system
+- ★ NEW: Payroll sheet with 16 payment columns
+- ★ NEW: PaymentSummary sheet for reporting
+- ★ NEW: Payment configuration in Settings
+- Enhanced Calculations with payment columns
+- Enhanced Dashboard with 8 payment metrics
+- 5 new VBA macros for payment operations
+- Complete Payment Features Guide documentation
+- Focus on hours and payment management
+- Corporate-grade financial reporting
+- Accounting system integration
+
 Version 1.0.0 (January 2025)
 - Initial release
 - Complete Excel workbook with 5 sheets
-- VBA automation suite
+- VBA automation suite (6 macros)
 - Power BI integration support
 - Comprehensive documentation
 - Sample data included
+- Time tracking focus
 
 ===================================================================
 END OF README

@@ -393,3 +393,514 @@ End Sub
 ' ===================================================================
 ' END OF VBA CODE
 ' ===================================================================
+
+' ===================================================================
+' PAYMENT & PAYROLL MACROS
+' Added for Corporate-Grade Management System
+' ===================================================================
+
+' ===================================================================
+' MACRO: GeneratePayrollReport
+' PURPOSE: Generate comprehensive payroll report for selected period
+' ===================================================================
+Sub GeneratePayrollReport()
+    Dim wsPayroll As Worksheet
+    Dim wsReport As Worksheet
+    Dim startDate As Date
+    Dim endDate As Date
+    Dim lastRow As Long
+    Dim reportRow As Long
+    Dim i As Long
+    
+    On Error GoTo ErrorHandler
+    
+    ' Get date range from user
+    startDate = InputBox("Enter start date (MM/DD/YYYY):", "Payroll Report", Format(Date - 30, "MM/DD/YYYY"))
+    If startDate = 0 Then Exit Sub
+    
+    endDate = InputBox("Enter end date (MM/DD/YYYY):", "Payroll Report", Format(Date, "MM/DD/YYYY"))
+    If endDate = 0 Then Exit Sub
+    
+    ' Set reference to sheets
+    Set wsPayroll = ThisWorkbook.Sheets("Payroll")
+    
+    ' Create or clear report sheet
+    On Error Resume Next
+    Set wsReport = ThisWorkbook.Sheets("PayrollReport")
+    If wsReport Is Nothing Then
+        Set wsReport = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        wsReport.Name = "PayrollReport"
+    Else
+        wsReport.Cells.Clear
+    End If
+    On Error GoTo ErrorHandler
+    
+    ' Create report header
+    With wsReport
+        .Range("A1").Value = "PAYROLL REPORT"
+        .Range("A1").Font.Size = 16
+        .Range("A1").Font.Bold = True
+        
+        .Range("A2").Value = "Period: " & Format(startDate, "DD-MMM-YYYY") & " to " & Format(endDate, "DD-MMM-YYYY")
+        .Range("A3").Value = "Generated: " & Format(Now, "DD-MMM-YYYY HH:MM")
+        
+        ' Column headers
+        reportRow = 5
+        .Cells(reportRow, 1).Value = "Employee ID"
+        .Cells(reportRow, 2).Value = "Department"
+        .Cells(reportRow, 3).Value = "Total Hours"
+        .Cells(reportRow, 4).Value = "Regular Hours"
+        .Cells(reportRow, 5).Value = "Overtime Hours"
+        .Cells(reportRow, 6).Value = "Night Hours"
+        .Cells(reportRow, 7).Value = "Gross Pay"
+        .Cells(reportRow, 8).Value = "Deductions"
+        .Cells(reportRow, 9).Value = "Net Pay"
+        
+        ' Format headers
+        With .Range(.Cells(reportRow, 1), .Cells(reportRow, 9))
+            .Font.Bold = True
+            .Interior.Color = RGB(68, 114, 196)
+            .Font.Color = RGB(255, 255, 255)
+        End With
+    End With
+    
+    ' Copy filtered data
+    reportRow = reportRow + 1
+    lastRow = wsPayroll.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    For i = 2 To lastRow
+        Dim recordDate As Date
+        recordDate = wsPayroll.Cells(i, 2).Value
+        
+        If recordDate >= startDate And recordDate <= endDate Then
+            wsReport.Cells(reportRow, 1).Value = wsPayroll.Cells(i, 1).Value  ' Employee ID
+            wsReport.Cells(reportRow, 2).Value = wsPayroll.Cells(i, 3).Value  ' Department
+            wsReport.Cells(reportRow, 3).Value = wsPayroll.Cells(i, 4).Value + wsPayroll.Cells(i, 5).Value  ' Total Hours
+            wsReport.Cells(reportRow, 4).Value = wsPayroll.Cells(i, 4).Value  ' Regular Hours
+            wsReport.Cells(reportRow, 5).Value = wsPayroll.Cells(i, 5).Value  ' Overtime Hours
+            wsReport.Cells(reportRow, 6).Value = wsPayroll.Cells(i, 6).Value  ' Night Hours
+            wsReport.Cells(reportRow, 7).Value = wsPayroll.Cells(i, 11).Value ' Gross Pay
+            wsReport.Cells(reportRow, 8).Value = wsPayroll.Cells(i, 15).Value ' Deductions
+            wsReport.Cells(reportRow, 9).Value = wsPayroll.Cells(i, 16).Value ' Net Pay
+            
+            reportRow = reportRow + 1
+        End If
+    Next i
+    
+    ' Add totals row
+    If reportRow > 6 Then
+        With wsReport
+            .Cells(reportRow, 1).Value = "TOTAL"
+            .Cells(reportRow, 1).Font.Bold = True
+            .Cells(reportRow, 3).Formula = "=SUM(C6:C" & reportRow - 1 & ")"
+            .Cells(reportRow, 4).Formula = "=SUM(D6:D" & reportRow - 1 & ")"
+            .Cells(reportRow, 5).Formula = "=SUM(E6:E" & reportRow - 1 & ")"
+            .Cells(reportRow, 6).Formula = "=SUM(F6:F" & reportRow - 1 & ")"
+            .Cells(reportRow, 7).Formula = "=SUM(G6:G" & reportRow - 1 & ")"
+            .Cells(reportRow, 8).Formula = "=SUM(H6:H" & reportRow - 1 & ")"
+            .Cells(reportRow, 9).Formula = "=SUM(I6:I" & reportRow - 1 & ")"
+            
+            ' Format totals row
+            .Range(.Cells(reportRow, 1), .Cells(reportRow, 9)).Font.Bold = True
+            .Range(.Cells(reportRow, 1), .Cells(reportRow, 9)).Interior.Color = RGB(217, 217, 217)
+        End With
+    End If
+    
+    ' Auto-fit columns
+    wsReport.Columns("A:I").AutoFit
+    
+    ' Activate report sheet
+    wsReport.Activate
+    
+    MsgBox "Payroll report generated successfully!" & vbCrLf & _
+           "Records: " & (reportRow - 6), vbInformation, "Report Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error generating payroll report: " & Err.Description, vbCritical, "Error"
+End Sub
+
+' ===================================================================
+' MACRO: ExportPayrollToCSV
+' PURPOSE: Export payroll data to CSV for external systems
+' ===================================================================
+Sub ExportPayrollToCSV()
+    Dim wsPayroll As Worksheet
+    Dim filePath As String
+    Dim fileNum As Integer
+    Dim lastRow As Long
+    Dim i As Long
+    Dim j As Long
+    Dim exportLine As String
+    
+    On Error GoTo ErrorHandler
+    
+    Set wsPayroll = ThisWorkbook.Sheets("Payroll")
+    
+    ' Get save location from user
+    filePath = Application.GetSaveAsFilename( _
+        InitialFileName:="Payroll_Export_" & Format(Date, "YYYYMMDD") & ".csv", _
+        fileFilter:="CSV Files (*.csv), *.csv", _
+        Title:="Export Payroll Data")
+    
+    If filePath = "False" Then Exit Sub
+    
+    ' Open file for output
+    fileNum = FreeFile
+    Open filePath For Output As #fileNum
+    
+    ' Write header row
+    lastRow = wsPayroll.Cells(Rows.Count, 1).End(xlUp).Row
+    exportLine = ""
+    For j = 1 To 16  ' All columns in Payroll sheet
+        If j > 1 Then exportLine = exportLine & ","
+        exportLine = exportLine & Chr(34) & wsPayroll.Cells(1, j).Value & Chr(34)
+    Next j
+    Print #fileNum, exportLine
+    
+    ' Write data rows
+    For i = 2 To lastRow
+        If wsPayroll.Cells(i, 1).Value <> "" Then
+            exportLine = ""
+            For j = 1 To 16
+                If j > 1 Then exportLine = exportLine & ","
+                exportLine = exportLine & Chr(34) & wsPayroll.Cells(i, j).Value & Chr(34)
+            Next j
+            Print #fileNum, exportLine
+        End If
+    Next i
+    
+    Close #fileNum
+    
+    MsgBox "Payroll data exported successfully!" & vbCrLf & _
+           "File: " & filePath & vbCrLf & _
+           "Records: " & (lastRow - 1), vbInformation, "Export Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    Close #fileNum
+    MsgBox "Error exporting payroll data: " & Err.Description, vbCritical, "Error"
+End Sub
+
+' ===================================================================
+' MACRO: GenerateEmployeePayslip
+' PURPOSE: Generate individual payslip for an employee
+' ===================================================================
+Sub GenerateEmployeePayslip()
+    Dim wsPayroll As Worksheet
+    Dim wsPayslip As Worksheet
+    Dim employeeID As String
+    Dim startDate As Date
+    Dim endDate As Date
+    Dim lastRow As Long
+    Dim i As Long
+    Dim payslipRow As Long
+    Dim totalGross As Double
+    Dim totalDeductions As Double
+    Dim totalNet As Double
+    
+    On Error GoTo ErrorHandler
+    
+    ' Get employee ID from user
+    employeeID = InputBox("Enter Employee ID:", "Generate Payslip", "E001")
+    If employeeID = "" Then Exit Sub
+    
+    ' Get date range
+    startDate = InputBox("Enter start date (MM/DD/YYYY):", "Payslip Period", Format(Date - 30, "MM/DD/YYYY"))
+    If startDate = 0 Then Exit Sub
+    
+    endDate = InputBox("Enter end date (MM/DD/YYYY):", "Payslip Period", Format(Date, "MM/DD/YYYY"))
+    If endDate = 0 Then Exit Sub
+    
+    Set wsPayroll = ThisWorkbook.Sheets("Payroll")
+    
+    ' Create or clear payslip sheet
+    On Error Resume Next
+    Set wsPayslip = ThisWorkbook.Sheets("Payslip_" & employeeID)
+    If wsPayslip Is Nothing Then
+        Set wsPayslip = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        wsPayslip.Name = "Payslip_" & employeeID
+    Else
+        wsPayslip.Cells.Clear
+    End If
+    On Error GoTo ErrorHandler
+    
+    ' Create payslip header
+    With wsPayslip
+        .Range("A1").Value = "EMPLOYEE PAYSLIP"
+        .Range("A1").Font.Size = 18
+        .Range("A1").Font.Bold = True
+        .Range("A1:F1").Merge
+        
+        .Range("A3").Value = "Employee ID:"
+        .Range("B3").Value = employeeID
+        .Range("A4").Value = "Period:"
+        .Range("B4").Value = Format(startDate, "DD-MMM-YYYY") & " to " & Format(endDate, "DD-MMM-YYYY")
+        .Range("A5").Value = "Generated:"
+        .Range("B5").Value = Format(Now, "DD-MMM-YYYY HH:MM")
+        
+        ' Payment details header
+        payslipRow = 7
+        .Cells(payslipRow, 1).Value = "EARNINGS"
+        .Cells(payslipRow, 1).Font.Bold = True
+        .Cells(payslipRow, 1).Interior.Color = RGB(112, 173, 71)
+        .Range("A" & payslipRow & ":C" & payslipRow).Merge
+        
+        payslipRow = payslipRow + 1
+        .Cells(payslipRow, 1).Value = "Description"
+        .Cells(payslipRow, 2).Value = "Hours"
+        .Cells(payslipRow, 3).Value = "Amount"
+        .Range("A" & payslipRow & ":C" & payslipRow).Font.Bold = True
+    End With
+    
+    ' Initialize totals
+    totalGross = 0
+    totalDeductions = 0
+    totalNet = 0
+    
+    Dim totalRegHours As Double, totalOTHours As Double, totalNightHours As Double
+    Dim totalBasePay As Double, totalOTPay As Double, totalNightPay As Double
+    
+    ' Collect data from payroll sheet
+    lastRow = wsPayroll.Cells(Rows.Count, 1).End(xlUp).Row
+    For i = 2 To lastRow
+        If wsPayroll.Cells(i, 1).Value = employeeID Then
+            Dim recordDate As Date
+            recordDate = wsPayroll.Cells(i, 2).Value
+            
+            If recordDate >= startDate And recordDate <= endDate Then
+                totalRegHours = totalRegHours + wsPayroll.Cells(i, 4).Value
+                totalOTHours = totalOTHours + wsPayroll.Cells(i, 5).Value
+                totalNightHours = totalNightHours + wsPayroll.Cells(i, 6).Value
+                totalBasePay = totalBasePay + wsPayroll.Cells(i, 7).Value
+                totalOTPay = totalOTPay + wsPayroll.Cells(i, 8).Value
+                totalNightPay = totalNightPay + wsPayroll.Cells(i, 9).Value
+                totalGross = totalGross + wsPayroll.Cells(i, 11).Value
+                totalDeductions = totalDeductions + wsPayroll.Cells(i, 15).Value
+                totalNet = totalNet + wsPayroll.Cells(i, 16).Value
+            End If
+        End If
+    Next i
+    
+    ' Add earnings details
+    payslipRow = payslipRow + 1
+    With wsPayslip
+        .Cells(payslipRow, 1).Value = "Regular Pay"
+        .Cells(payslipRow, 2).Value = totalRegHours
+        .Cells(payslipRow, 3).Value = totalBasePay
+        .Cells(payslipRow, 3).NumberFormat = "$#,##0.00"
+        
+        payslipRow = payslipRow + 1
+        .Cells(payslipRow, 1).Value = "Overtime Pay"
+        .Cells(payslipRow, 2).Value = totalOTHours
+        .Cells(payslipRow, 3).Value = totalOTPay
+        .Cells(payslipRow, 3).NumberFormat = "$#,##0.00"
+        
+        payslipRow = payslipRow + 1
+        .Cells(payslipRow, 1).Value = "Night Shift Allowance"
+        .Cells(payslipRow, 2).Value = totalNightHours
+        .Cells(payslipRow, 3).Value = totalNightPay
+        .Cells(payslipRow, 3).NumberFormat = "$#,##0.00"
+        
+        payslipRow = payslipRow + 1
+        .Cells(payslipRow, 1).Value = "GROSS PAY"
+        .Cells(payslipRow, 1).Font.Bold = True
+        .Cells(payslipRow, 3).Value = totalGross
+        .Cells(payslipRow, 3).Font.Bold = True
+        .Cells(payslipRow, 3).NumberFormat = "$#,##0.00"
+        
+        ' Deductions section
+        payslipRow = payslipRow + 2
+        .Cells(payslipRow, 1).Value = "DEDUCTIONS"
+        .Cells(payslipRow, 1).Font.Bold = True
+        .Cells(payslipRow, 1).Interior.Color = RGB(255, 192, 0)
+        .Range("A" & payslipRow & ":C" & payslipRow).Merge
+        
+        payslipRow = payslipRow + 1
+        .Cells(payslipRow, 1).Value = "Total Deductions"
+        .Cells(payslipRow, 3).Value = totalDeductions
+        .Cells(payslipRow, 3).NumberFormat = "$#,##0.00"
+        
+        ' Net pay
+        payslipRow = payslipRow + 2
+        .Cells(payslipRow, 1).Value = "NET PAY"
+        .Cells(payslipRow, 1).Font.Size = 14
+        .Cells(payslipRow, 1).Font.Bold = True
+        .Cells(payslipRow, 3).Value = totalNet
+        .Cells(payslipRow, 3).Font.Size = 14
+        .Cells(payslipRow, 3).Font.Bold = True
+        .Cells(payslipRow, 3).NumberFormat = "$#,##0.00"
+        .Cells(payslipRow, 1).Interior.Color = RGB(68, 114, 196)
+        .Cells(payslipRow, 3).Interior.Color = RGB(68, 114, 196)
+        
+        ' Auto-fit columns
+        .Columns("A:C").AutoFit
+    End With
+    
+    ' Activate payslip sheet
+    wsPayslip.Activate
+    
+    MsgBox "Payslip generated for " & employeeID & vbCrLf & _
+           "Period: " & Format(startDate, "DD-MMM-YYYY") & " to " & Format(endDate, "DD-MMM-YYYY") & vbCrLf & _
+           "Net Pay: $" & Format(totalNet, "#,##0.00"), vbInformation, "Payslip Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error generating payslip: " & Err.Description, vbCritical, "Error"
+End Sub
+
+' ===================================================================
+' MACRO: ValidatePayrollData
+' PURPOSE: Validate payroll calculations and flag anomalies
+' ===================================================================
+Sub ValidatePayrollData()
+    Dim wsPayroll As Worksheet
+    Dim wsValidation As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim validationRow As Long
+    Dim errorCount As Long
+    
+    On Error GoTo ErrorHandler
+    
+    Set wsPayroll = ThisWorkbook.Sheets("Payroll")
+    
+    ' Create or clear validation sheet
+    On Error Resume Next
+    Set wsValidation = ThisWorkbook.Sheets("PayrollValidation")
+    If wsValidation Is Nothing Then
+        Set wsValidation = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        wsValidation.Name = "PayrollValidation"
+    Else
+        wsValidation.Cells.Clear
+    End If
+    On Error GoTo ErrorHandler
+    
+    ' Create validation report header
+    With wsValidation
+        .Range("A1").Value = "PAYROLL VALIDATION REPORT"
+        .Range("A1").Font.Size = 14
+        .Range("A1").Font.Bold = True
+        
+        .Range("A2").Value = "Generated: " & Format(Now, "DD-MMM-YYYY HH:MM")
+        
+        validationRow = 4
+        .Cells(validationRow, 1).Value = "Employee ID"
+        .Cells(validationRow, 2).Value = "Date"
+        .Cells(validationRow, 3).Value = "Issue Type"
+        .Cells(validationRow, 4).Value = "Description"
+        
+        .Range("A" & validationRow & ":D" & validationRow).Font.Bold = True
+        .Range("A" & validationRow & ":D" & validationRow).Interior.Color = RGB(255, 192, 0)
+    End With
+    
+    validationRow = validationRow + 1
+    errorCount = 0
+    
+    ' Perform validations
+    lastRow = wsPayroll.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    For i = 2 To lastRow
+        If wsPayroll.Cells(i, 1).Value <> "" Then
+            ' Check for negative values
+            If wsPayroll.Cells(i, 16).Value < 0 Then  ' Net Pay
+                wsValidation.Cells(validationRow, 1).Value = wsPayroll.Cells(i, 1).Value
+                wsValidation.Cells(validationRow, 2).Value = wsPayroll.Cells(i, 2).Value
+                wsValidation.Cells(validationRow, 3).Value = "Negative Net Pay"
+                wsValidation.Cells(validationRow, 4).Value = "Net pay is negative: $" & Format(wsPayroll.Cells(i, 16).Value, "#,##0.00")
+                validationRow = validationRow + 1
+                errorCount = errorCount + 1
+            End If
+            
+            ' Check for excessive overtime (>20 hours per day)
+            If wsPayroll.Cells(i, 5).Value > 20 Then
+                wsValidation.Cells(validationRow, 1).Value = wsPayroll.Cells(i, 1).Value
+                wsValidation.Cells(validationRow, 2).Value = wsPayroll.Cells(i, 2).Value
+                wsValidation.Cells(validationRow, 3).Value = "Excessive Overtime"
+                wsValidation.Cells(validationRow, 4).Value = "Overtime hours: " & wsPayroll.Cells(i, 5).Value
+                validationRow = validationRow + 1
+                errorCount = errorCount + 1
+            End If
+            
+            ' Check if deductions exceed gross pay
+            If wsPayroll.Cells(i, 15).Value > wsPayroll.Cells(i, 11).Value Then
+                wsValidation.Cells(validationRow, 1).Value = wsPayroll.Cells(i, 1).Value
+                wsValidation.Cells(validationRow, 2).Value = wsPayroll.Cells(i, 2).Value
+                wsValidation.Cells(validationRow, 3).Value = "Deductions > Gross"
+                wsValidation.Cells(validationRow, 4).Value = "Deductions exceed gross pay"
+                validationRow = validationRow + 1
+                errorCount = errorCount + 1
+            End If
+        End If
+    Next i
+    
+    ' Add summary
+    If errorCount = 0 Then
+        wsValidation.Cells(validationRow + 1, 1).Value = "✓ No issues found. Payroll data is valid."
+        wsValidation.Cells(validationRow + 1, 1).Font.Color = RGB(0, 128, 0)
+        wsValidation.Cells(validationRow + 1, 1).Font.Bold = True
+    Else
+        wsValidation.Cells(validationRow + 1, 1).Value = "⚠ " & errorCount & " issues found. Please review."
+        wsValidation.Cells(validationRow + 1, 1).Font.Color = RGB(255, 0, 0)
+        wsValidation.Cells(validationRow + 1, 1).Font.Bold = True
+    End If
+    
+    ' Auto-fit columns
+    wsValidation.Columns("A:D").AutoFit
+    
+    ' Activate validation sheet
+    wsValidation.Activate
+    
+    MsgBox "Payroll validation complete!" & vbCrLf & _
+           "Issues found: " & errorCount, vbInformation, "Validation Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error validating payroll data: " & Err.Description, vbCritical, "Error"
+End Sub
+
+' ===================================================================
+' MACRO: UpdatePayrollCalculations
+' PURPOSE: Recalculate all payroll formulas and refresh data
+' ===================================================================
+Sub UpdatePayrollCalculations()
+    Dim wsPayroll As Worksheet
+    Dim wsCalc As Worksheet
+    Dim wsDash As Worksheet
+    
+    On Error GoTo ErrorHandler
+    
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    
+    ' Force calculation refresh
+    Set wsPayroll = ThisWorkbook.Sheets("Payroll")
+    Set wsCalc = ThisWorkbook.Sheets("Calculations")
+    Set wsDash = ThisWorkbook.Sheets("Dashboard")
+    
+    wsCalc.Calculate
+    wsPayroll.Calculate
+    wsDash.Calculate
+    
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
+    
+    UpdateSystemStatus "Payroll Update", Now
+    
+    MsgBox "Payroll calculations updated successfully!", vbInformation, "Update Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
+    MsgBox "Error updating payroll: " & Err.Description, vbCritical, "Error"
+End Sub
+
+' ===================================================================
+' END OF PAYMENT & PAYROLL MACROS
+' ===================================================================
