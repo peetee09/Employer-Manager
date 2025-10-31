@@ -12,11 +12,12 @@ This repository now contains a complete, production-ready employee time tracking
 ## 📋 Complete Package Contents
 
 ### 1. Excel Files (`Excel_Files/`)
-- ✅ **ShiftGuard_System.xlsm** - Main macro-enabled workbook with sample data
+- ✅ **ShiftGuard_System.xlsx** - Main workbook with sample data
   - 5 fully configured sheets (BiometricData, Settings, Calculations, Dashboard, ControlPanel)
   - 100 rows of sample data for testing
   - Professional formatting with colors and borders
   - Ready-to-use formulas and calculations
+  - Note: VBA macros must be manually added (see VBA_Code.txt)
   
 - ✅ **ShiftGuard_Template.xlsx** - Clean template without sample data
   - Same structure as main workbook
@@ -205,7 +206,7 @@ All 6 required macros are complete and functional:
 - [x] Power_BI_Setup.txt - BI integration
 
 ### File Structure ✓
-- [x] Excel_Files/ with .xlsm, .xlsx, and VBA code
+- [x] Excel_Files/ with .xlsx workbooks and VBA code
 - [x] Power_BI/ with setup guide
 - [x] Documentation/ with all guides
 - [x] Sample_Data/ with CSV file
@@ -274,20 +275,20 @@ All 6 required macros are complete and functional:
 6. **Automation** - VBA macros for efficiency
 
 ## 💻 Technical Specifications
-- **File Format**: Excel Macro-Enabled Workbook (.xlsm)
+- **File Format**: Excel Workbook (.xlsx) - VBA code provided separately for manual installation
 - **Excel Version**: Compatible with Excel 2013 and later
 - **Platform**: Windows and Mac (with notes for Mac users)
 - **Dependencies**: None (only Microsoft Excel required)
 - **File Size**: 50KB compressed, ~111KB uncompressed
-- **Language**: VBA (Visual Basic for Applications)
+- **Language**: VBA (Visual Basic for Applications) - code available in VBA_Code.txt
 - **Documentation Format**: Plain text (.txt) for universal compatibility
 
 ## 📁 Installation Steps
 1. Download `ShiftGuard_Complete_System.zip`
 2. Extract to desired location
 3. Run `Setup_Assistant.bat` (Windows) or open folder
-4. Open `ShiftGuard_System.xlsm`
-5. Enable macros when prompted
+4. Open `ShiftGuard_System.xlsx`
+5. To add VBA macros (optional): Follow instructions in VBA_Installation.txt
 6. System ready to use!
 
 ## 🔒 Security Features

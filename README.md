@@ -4,7 +4,7 @@ OBJECTIVE: Create a complete, downloadable ZIP package for an Excel-based employ
 
 REQUIRED DELIVERABLES:
 
-Macro-enabled Excel workbook (.xlsm) with VBA automation
+Excel workbook (.xlsx) with VBA code provided separately for manual installation
 
 Power BI template and setup files
 
@@ -126,7 +126,7 @@ FILE STRUCTURE FOR ZIP:
 text
 ShiftGuard_Complete_System/
 ├── Excel_Files/
-│   ├── ShiftGuard_System.xlsm
+│   ├── ShiftGuard_System.xlsx
 │   ├── ShiftGuard_Template.xlsx
 │   └── VBA_Code.txt
 ├── Power_BI/
