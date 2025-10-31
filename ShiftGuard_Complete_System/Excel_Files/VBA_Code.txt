@@ -631,7 +631,7 @@ Sub AnalyzeWellness()
     reportMsg = reportMsg & "─────────────────────────────────────────" & vbCrLf
     reportMsg = reportMsg & "Average Work Hours:     " & Format(avgWorkHours, "0.0") & " hrs/day" & vbCrLf
     reportMsg = reportMsg & "High Workload Cases:    " & highWorkloadCount
-    If highWorkloadCount > (lastRow - 1) * 0.2 Then
+    If validRecordCount > 0 And highWorkloadCount > validRecordCount * 0.2 Then
         reportMsg = reportMsg & " ⚠ CONCERNING"
     Else
         reportMsg = reportMsg & " ✓ ACCEPTABLE"
@@ -643,7 +643,7 @@ Sub AnalyzeWellness()
     If breakNonCompliant > breakCompliant * 0.1 Then
         reportMsg = reportMsg & "• Review break time policies" & vbCrLf
     End If
-    If highWorkloadCount > (lastRow - 1) * 0.2 Then
+    If validRecordCount > 0 And highWorkloadCount > validRecordCount * 0.2 Then
         reportMsg = reportMsg & "• Monitor employees with high workload" & vbCrLf
     End If
     If avgWorkHours > 8 Then
