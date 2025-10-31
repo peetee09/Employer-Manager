@@ -331,3 +331,90 @@ This system is provided for internal business use. Modify and customize accordin
 ---
 
 **ShiftGuard Version 2.0 - Where Hours Meet Payments** 💼⏰💰
+
+---
+
+## 🔄 Migration from Version 1.0
+
+### Is This a Breaking Change?
+**No** - Version 2.0 is fully backward compatible with Version 1.0 data.
+
+### Migration Path
+
+#### Option 1: Fresh Start (Recommended)
+If starting new or with minimal existing data:
+1. Download Version 2.0
+2. Open ShiftGuard_System.xlsx
+3. Configure payment settings in Settings sheet
+4. Import your biometric data CSV
+5. System ready to use with full payment features
+
+#### Option 2: Upgrade Existing System
+If you have substantial Version 1.0 data:
+1. **Backup**: Save a copy of your Version 1.0 file
+2. **Download**: Get Version 2.0 files
+3. **Copy Data**: 
+   - Open your old file and Version 2.0 side-by-side
+   - Copy BiometricData rows (skip header)
+   - Paste into Version 2.0 BiometricData sheet
+4. **Configure**: Set payment parameters in Settings sheet
+5. **Verify**: Run UpdatePayrollCalculations macro
+6. **Check**: Review Dashboard and Payroll sheet
+7. **Test**: Generate a test payroll report
+
+### What's Preserved
+✅ All biometric/attendance data  
+✅ All time calculations  
+✅ Employee records  
+✅ Department information  
+✅ Historical data  
+
+### What's New (Automatic)
+✅ Payroll calculations  
+✅ Payment metrics  
+✅ Financial KPIs  
+✅ Payment summaries  
+
+### Configuration Required
+After migration, configure these in Settings sheet:
+- Hourly Rate (default: $25)
+- Overtime Multiplier (default: 1.5)
+- Night Shift Allowance % (default: 15)
+- Weekend Allowance % (default: 20)
+- Tax Rate % (default: 15)
+- Health Insurance (default: $50)
+- Pension Contribution % (default: 5)
+
+### Data Migration Checklist
+```
+□ Backup Version 1.0 file
+□ Download Version 2.0
+□ Copy BiometricData (if upgrading)
+□ Configure payment settings
+□ Run UpdatePayrollCalculations
+□ Verify Dashboard metrics
+□ Check Payroll sheet calculations
+□ Generate test payroll report
+□ Review payment summary
+□ Export test CSV
+□ Training for team members
+```
+
+### Migration Time
+- Small dataset (<100 records): 15-30 minutes
+- Medium dataset (100-1000 records): 30-60 minutes
+- Large dataset (>1000 records): 1-2 hours
+
+### No Downtime Required
+- Migration can be done offline
+- Test thoroughly before switching
+- Run systems in parallel if needed
+- No data loss risk with proper backup
+
+### Support During Migration
+Refer to:
+- **Payment_Features_Guide.txt** - Payment configuration help
+- **Setup_Guide.txt** - Installation assistance
+- **Troubleshooting.txt** - Common migration issues
+
+---
