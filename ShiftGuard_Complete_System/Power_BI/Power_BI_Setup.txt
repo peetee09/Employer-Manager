@@ -47,7 +47,7 @@ SECTION 3: CONNECTING EXCEL TO POWER BI
 ===================================================================
 
 3.1 PREPARE EXCEL WORKBOOK
-    Step 1: Open ShiftGuard_System.xlsm
+    Step 1: Open ShiftGuard_System.xlsx
     Step 2: Click "Refresh All" on ControlPanel
     Step 3: Verify all data is up to date
     Step 4: Save workbook (Ctrl+S)
@@ -59,7 +59,7 @@ SECTION 3: CONNECTING EXCEL TO POWER BI
     Step 2: Click "Get Data" on ribbon
     Step 3: Select "Excel" from list
     Step 4: Click "Connect"
-    Step 5: Browse to ShiftGuard_System.xlsm
+    Step 5: Browse to ShiftGuard_System.xlsx
     Step 6: Click "Open"
     Step 7: Navigator window appears
 
@@ -500,7 +500,7 @@ SECTION 12: SAMPLE POWER QUERY M CODE
 For BiometricData Table:
 
 let
-    Source = Excel.Workbook(File.Contents("C:\Path\To\ShiftGuard_System.xlsm"), null, true),
+    Source = Excel.Workbook(File.Contents("C:\Path\To\ShiftGuard_System.xlsx"), null, true),
     BiometricData_Sheet = Source{[Item="BiometricData",Kind="Sheet"]}[Data],
     #"Promoted Headers" = Table.PromoteHeaders(BiometricData_Sheet, [PromoteAllScalars=true]),
     #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
@@ -520,7 +520,7 @@ in
 For Calculations Table:
 
 let
-    Source = Excel.Workbook(File.Contents("C:\Path\To\ShiftGuard_System.xlsm"), null, true),
+    Source = Excel.Workbook(File.Contents("C:\Path\To\ShiftGuard_System.xlsx"), null, true),
     Calculations_Sheet = Source{[Item="Calculations",Kind="Sheet"]}[Data],
     #"Promoted Headers" = Table.PromoteHeaders(Calculations_Sheet, [PromoteAllScalars=true]),
     #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
