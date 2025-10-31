@@ -28,7 +28,7 @@ SECTION 2: EXCEL WORKBOOK SETUP
 
 2.1 OPEN THE WORKBOOK
     Step 1: Navigate to Excel_Files folder
-    Step 2: Double-click ShiftGuard_System.xlsm
+    Step 2: Double-click ShiftGuard_System.xlsx
     Step 3: Excel will open with a security warning
 
 2.2 ENABLE MACROS
@@ -111,7 +111,7 @@ SECTION 4: DATA IMPORT
     Step 4: Save as .csv file
 
 4.2 IMPORT DATA USING VBA MACRO
-    Step 1: Open ShiftGuard_System.xlsm
+    Step 1: Open ShiftGuard_System.xlsx
     Step 2: Go to ControlPanel sheet
     Step 3: Click "Upload Biometric Data" button
     Step 4: File dialog opens
@@ -124,7 +124,7 @@ SECTION 4: DATA IMPORT
     Step 1: Open CSV file in Excel
     Step 2: Select all data (Ctrl+A)
     Step 3: Copy (Ctrl+C)
-    Step 4: Open ShiftGuard_System.xlsm
+    Step 4: Open ShiftGuard_System.xlsx
     Step 5: Go to BiometricData sheet
     Step 6: Click cell A2 (first data row)
     Step 7: Paste (Ctrl+V)
@@ -307,7 +307,7 @@ SECTION 9: POWER BI INTEGRATION
 9.2 CONNECTING POWER BI
     (See Power_BI/Power_BI_Setup.txt for complete instructions)
     - Use "Get Data" > Excel
-    - Select ShiftGuard_System.xlsm
+    - Select ShiftGuard_System.xlsx
     - Choose relevant sheets
     - Apply transformations as needed
 

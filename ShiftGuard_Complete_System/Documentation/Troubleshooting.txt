@@ -18,7 +18,7 @@ SECTION 1: MACRO AND SECURITY ISSUES
     
     Solution A: Enable Macros
     1. Close workbook
-    2. Reopen ShiftGuard_System.xlsm
+    2. Reopen ShiftGuard_System.xlsx
     3. Click "Enable Content" in yellow security bar
     4. Test a macro button
     

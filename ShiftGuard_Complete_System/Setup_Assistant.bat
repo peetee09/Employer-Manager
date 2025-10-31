@@ -60,7 +60,7 @@ echo.
 echo IMPORTANT: When Excel opens, click "Enable Content" to activate macros!
 echo.
 pause
-start "" "Excel_Files\ShiftGuard_System.xlsm"
+start "" "Excel_Files\ShiftGuard_System.xlsx"
 timeout /t 3
 goto MENU
 
@@ -162,7 +162,7 @@ echo.
 echo For support, please refer to the Documentation folder.
 echo.
 echo Quick Reference:
-echo - Main Workbook: Excel_Files\ShiftGuard_System.xlsm
+echo - Main Workbook: Excel_Files\ShiftGuard_System.xlsx
 echo - Documentation: Documentation\README.txt
 echo - Sample Data: Sample_Data\sample_biometric_data.csv
 echo.

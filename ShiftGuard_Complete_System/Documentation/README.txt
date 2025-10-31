@@ -64,7 +64,7 @@ QUICK START GUIDE
 
 1. BASIC SETUP
    - Extract all files from the ZIP archive
-   - Open ShiftGuard_System.xlsm
+   - Open ShiftGuard_System.xlsx
    - Enable macros when prompted
    - Review the Settings sheet and adjust parameters as needed
 
@@ -91,7 +91,7 @@ FILE STRUCTURE
 
 ShiftGuard_Complete_System/
 ├── Excel_Files/
-│   ├── ShiftGuard_System.xlsm    (Main workbook with sample data)
+│   ├── ShiftGuard_System.xlsx    (Main workbook with sample data)
 │   ├── ShiftGuard_Template.xlsx  (Clean template without data)
 │   └── VBA_Code.txt              (VBA source code for reference)
 │

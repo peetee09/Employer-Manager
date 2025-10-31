@@ -29,7 +29,7 @@ A complete, ready-to-use Excel-based employee time tracking system with:
 
 **All Users:**
 - Navigate to `Excel_Files` folder
-- Open `ShiftGuard_System.xlsm`
+- Open `ShiftGuard_System.xlsx`
 
 ### Step 3: Enable Macros
 When Excel opens:
@@ -326,4 +326,4 @@ Start using ShiftGuard today to:
 
 **Questions?** All answers are in the Documentation folder.
 
-**Ready to start?** Open Setup_Assistant.bat (Windows) or navigate to Excel_Files/ShiftGuard_System.xlsm!
+**Ready to start?** Open Setup_Assistant.bat (Windows) or navigate to Excel_Files/ShiftGuard_System.xlsx!

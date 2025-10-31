@@ -27,7 +27,7 @@ SECTION 2: ENABLING MACROS IN EXCEL
 2.1 WINDOWS - EXCEL 2016/2019/365
     
     Method 1: Enable for Current File
-    Step 1: Open ShiftGuard_System.xlsm
+    Step 1: Open ShiftGuard_System.xlsx
     Step 2: Security Warning appears at top
     Step 3: Click "Enable Content" button
     Step 4: Macros are now active
@@ -52,7 +52,7 @@ SECTION 2: ENABLING MACROS IN EXCEL
 
 2.2 MAC - EXCEL 2016/2019/365
     
-    Step 1: Open ShiftGuard_System.xlsm
+    Step 1: Open ShiftGuard_System.xlsx
     Step 2: Click "Enable Macros" when prompted
     
     If not prompted:
@@ -70,7 +70,7 @@ SECTION 2: ENABLING MACROS IN EXCEL
 
 2.3 EXCEL 2013 (WINDOWS)
     
-    Step 1: Open ShiftGuard_System.xlsm
+    Step 1: Open ShiftGuard_System.xlsx
     Step 2: Click "Enable Content" in yellow bar
     
     If blocked:
@@ -87,7 +87,7 @@ SECTION 3: VERIFYING MACRO INSTALLATION
 ===================================================================
 
 3.1 CHECK MACRO STATUS
-    Step 1: Open ShiftGuard_System.xlsm
+    Step 1: Open ShiftGuard_System.xlsx
     Step 2: Press Alt+F11 (VBA Editor opens)
     Step 3: If VBA Editor opens, macros can run
     Step 4: Close VBA Editor (Alt+Q)
@@ -406,7 +406,7 @@ Ctrl+G          Open Immediate Window
 
 FILE LOCATIONS:
 VBA Code:       Excel_Files/VBA_Code.txt
-Main Workbook:  Excel_Files/ShiftGuard_System.xlsm
+Main Workbook:  Excel_Files/ShiftGuard_System.xlsx
 Template:       Excel_Files/ShiftGuard_Template.xlsx
 
 MACRO NAMES:
