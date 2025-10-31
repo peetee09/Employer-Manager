@@ -97,7 +97,9 @@ Sub UploadBiometricData()
     Exit Sub
     
 ErrorHandler:
+    On Error Resume Next
     Close #fileNum
+    On Error GoTo 0
     MsgBox "Error uploading data: " & Err.Description, vbCritical, "Upload Error"
 End Sub
 
@@ -248,7 +250,9 @@ Sub ExportDataToCSV()
     Exit Sub
     
 ErrorHandler:
+    On Error Resume Next
     Close #fileNum
+    On Error GoTo 0
     MsgBox "Error exporting data: " & Err.Description, vbCritical, "Export Error"
 End Sub
 
@@ -538,7 +542,9 @@ Sub ExportDashboardToHTML()
     Exit Sub
     
 ErrorHandler:
+    On Error Resume Next
     Close #fileNum
+    On Error GoTo 0
     MsgBox "Error exporting dashboard: " & Err.Description, vbCritical, "Export Error"
 End Sub
 
@@ -568,10 +574,14 @@ Sub AnalyzeWellness()
     breakNonCompliant = 0
     avgWorkHours = 0
     highWorkloadCount = 0
+    Dim validRecordCount As Long
+    validRecordCount = 0
     
     ' Analyze data
     For i = 2 To lastRow
         If wsCalc.Cells(i, 1).Value <> "" Then
+            validRecordCount = validRecordCount + 1
+            
             ' Break compliance
             If wsCalc.Cells(i, 9).Value = "Compliant" Then
                 breakCompliant = breakCompliant + 1
@@ -595,9 +605,9 @@ Sub AnalyzeWellness()
     Next i
     
     ' Calculate averages
-    If lastRow > 2 Then
-        avgBreakTime = avgBreakTime / (lastRow - 1)
-        avgWorkHours = avgWorkHours / (lastRow - 1)
+    If validRecordCount > 0 Then
+        avgBreakTime = avgBreakTime / validRecordCount
+        avgWorkHours = avgWorkHours / validRecordCount
     End If
     
     ' Build report
