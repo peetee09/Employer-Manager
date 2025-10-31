@@ -1,0 +1,682 @@
+===================================================================
+SHIFTGUARD TROUBLESHOOTING GUIDE
+===================================================================
+Solutions to Common Problems and Issues
+
+===================================================================
+SECTION 1: MACRO AND SECURITY ISSUES
+===================================================================
+
+1.1 PROBLEM: Macros Don't Work / Buttons Don't Respond
+    
+    SYMPTOMS:
+    - Clicking buttons does nothing
+    - No response from Control Panel
+    - No error messages appear
+    
+    SOLUTIONS:
+    
+    Solution A: Enable Macros
+    1. Close workbook
+    2. Reopen ShiftGuard_System.xlsm
+    3. Click "Enable Content" in yellow security bar
+    4. Test a macro button
+    
+    Solution B: Check Macro Security Settings
+    1. File > Options > Trust Center
+    2. Trust Center Settings > Macro Settings
+    3. Select "Disable all macros with notification"
+    4. Close and reopen workbook
+    5. Enable macros when prompted
+    
+    Solution C: Add to Trusted Locations
+    1. File > Options > Trust Center
+    2. Trust Center Settings > Trusted Locations
+    3. Add new location
+    4. Browse to ShiftGuard folder
+    5. Check "Subfolders also trusted"
+    6. Click OK
+
+1.2 PROBLEM: "Cannot run the macro" Error
+    
+    SYMPTOMS:
+    - Error message when clicking buttons
+    - Message says macro may not exist or be disabled
+    
+    SOLUTIONS:
+    
+    Solution A: Verify VBA Code Exists
+    1. Press Alt+F11 to open VBA Editor
+    2. Check for modules in Project Explorer
+    3. If no modules, VBA code not installed
+    4. Follow VBA_Installation.txt to add code
+    
+    Solution B: Check Macro Names
+    1. In VBA Editor, verify macro names:
+       - UploadBiometricData
+       - GenerateAutomatedReport
+       - ExportDataToCSV
+       - UpdateDashboard
+       - ValidateData
+       - RefreshAllData
+    2. Names must match exactly (case-sensitive)
+
+1.3 PROBLEM: "Compile Error" Messages
+    
+    SYMPTOMS:
+    - Error when opening workbook
+    - "Compile error: Can't find project or library"
+    
+    SOLUTIONS:
+    
+    Solution A: Fix Missing References
+    1. Press Alt+F11 (VBA Editor)
+    2. Tools > References
+    3. Uncheck items marked "MISSING"
+    4. Click OK
+    5. Close VBA Editor
+    6. Save workbook
+    
+    Solution B: Reset Excel
+    1. Close all Excel files
+    2. Delete Excel temp files
+    3. Restart Excel
+    4. Reopen workbook
+
+===================================================================
+SECTION 2: DATA IMPORT ISSUES
+===================================================================
+
+2.1 PROBLEM: CSV Upload Fails
+    
+    SYMPTOMS:
+    - Error when uploading CSV
+    - Data doesn't appear after upload
+    - Incorrect data in cells
+    
+    SOLUTIONS:
+    
+    Solution A: Verify CSV Format
+    1. Open CSV in text editor (Notepad)
+    2. Check first line is header:
+       Employee ID,Date,Clock-In,Clock-Out,Tea Break,Lunch Break,Department,Shift Type
+    3. Verify data rows follow format
+    4. No extra commas or special characters
+    5. Save and try again
+    
+    Solution B: Check Date/Time Format
+    1. Date must be YYYY-MM-DD (e.g., 2025-01-01)
+    2. Time must be HH:MM (e.g., 08:00)
+    3. Use 24-hour format only
+    4. No AM/PM indicators
+    
+    Solution C: Test with Sample Data
+    1. Use provided sample_biometric_data.csv
+    2. If sample works, issue is with your data
+    3. Compare your CSV to sample
+    4. Fix formatting differences
+    
+    Solution D: Manual Import
+    1. Open CSV in Excel (separate file)
+    2. Copy data (without headers)
+    3. Go to BiometricData sheet
+    4. Paste at row 2 (below headers)
+    5. Click "Refresh All" button
+
+2.2 PROBLEM: Data Appears Incorrectly
+    
+    SYMPTOMS:
+    - Numbers show as text
+    - Dates show as numbers
+    - Times don't calculate
+    
+    SOLUTIONS:
+    
+    Solution A: Fix Data Types
+    1. Select affected column
+    2. Data > Text to Columns
+    3. Click "Finish" (accept defaults)
+    4. Data converts to proper type
+    
+    Solution B: Reformat Cells
+    1. Select time columns (C and D)
+    2. Right-click > Format Cells
+    3. Category: Time
+    4. Type: 13:30
+    5. Click OK
+    
+    Solution C: Fix Date Column
+    1. Select date column (B)
+    2. Right-click > Format Cells
+    3. Category: Date
+    4. Type: 2012-03-14
+    5. Click OK
+
+2.3 PROBLEM: "Permission Denied" on Import
+    
+    SYMPTOMS:
+    - Cannot open CSV file
+    - Permission error during upload
+    
+    SOLUTIONS:
+    
+    Solution A: Close Other Programs
+    1. Close CSV file if open elsewhere
+    2. Close other Excel instances
+    3. Try upload again
+    
+    Solution B: Check File Permissions
+    1. Right-click CSV file
+    2. Properties > Security
+    3. Verify you have Read permissions
+    4. If not, click Edit and grant permissions
+
+===================================================================
+SECTION 3: CALCULATION PROBLEMS
+===================================================================
+
+3.1 PROBLEM: Formulas Show #REF! Error
+    
+    SYMPTOMS:
+    - #REF! appears in Calculations sheet
+    - Formulas broken after data change
+    
+    SOLUTIONS:
+    
+    Solution A: Restore Formula
+    1. Go to Calculations sheet
+    2. Click cell with error
+    3. Formula should reference BiometricData sheet
+    4. If broken, replace with correct formula
+    5. Copy formula down entire column
+    
+    Solution B: Recreate Sheet
+    1. If many errors, use template
+    2. Open ShiftGuard_Template.xlsx
+    3. Copy Calculations sheet
+    4. Paste into your workbook
+    5. Refresh calculations
+
+3.2 PROBLEM: Formulas Show #VALUE! Error
+    
+    SYMPTOMS:
+    - #VALUE! in calculation cells
+    - Incorrect data types
+    
+    SOLUTIONS:
+    
+    Solution A: Check Source Data
+    1. Go to BiometricData sheet
+    2. Verify Clock-In/Out are times, not text
+    3. Verify breaks are numbers
+    4. Fix any text in numeric columns
+    
+    Solution B: Clear and Recalculate
+    1. Click "Validate Data" button
+    2. Fix identified errors
+    3. Click "Refresh All" button
+
+3.3 PROBLEM: Dashboard Shows Zero or Blank
+    
+    SYMPTOMS:
+    - All KPIs show 0 or blank
+    - Metrics not updating
+    
+    SOLUTIONS:
+    
+    Solution A: Refresh System
+    1. Go to ControlPanel sheet
+    2. Click "Refresh All" button
+    3. Wait for completion
+    4. Check Dashboard again
+    
+    Solution B: Manual Calculation
+    1. Formulas > Calculation Options
+    2. Select "Automatic"
+    3. Press F9 to recalculate
+    4. Check Dashboard
+    
+    Solution C: Verify Data Exists
+    1. Go to BiometricData sheet
+    2. Ensure data present (not just headers)
+    3. Go to Calculations sheet
+    4. Verify formulas calculate
+    5. Then check Dashboard
+
+===================================================================
+SECTION 4: PERFORMANCE ISSUES
+===================================================================
+
+4.1 PROBLEM: Workbook is Slow
+    
+    SYMPTOMS:
+    - Excel freezes or lags
+    - Long calculation times
+    - Slow to open/save
+    
+    SOLUTIONS:
+    
+    Solution A: Reduce Data Volume
+    1. Export old data to CSV
+    2. Delete old rows from BiometricData
+    3. Keep only recent data (last 3 months)
+    4. Save workbook
+    
+    Solution B: Disable Auto-Calculate
+    1. Formulas > Calculation Options
+    2. Select "Manual"
+    3. Make data changes
+    4. Press F9 when ready to recalculate
+    5. Re-enable "Automatic" when done
+    
+    Solution C: Optimize Formulas
+    1. Avoid volatile functions (NOW, TODAY)
+    2. Use specific ranges instead of entire columns
+    3. Minimize array formulas
+    
+    Solution D: Close Unused Sheets
+    1. Right-click sheet tabs
+    2. Hide sheets not in use
+    3. Reduces memory usage
+
+4.2 PROBLEM: Excel Crashes or Freezes
+    
+    SYMPTOMS:
+    - Excel stops responding
+    - "Not Responding" in title bar
+    
+    SOLUTIONS:
+    
+    Solution A: Wait for Completion
+    1. Give Excel 5-10 minutes
+    2. Large calculations take time
+    3. Check Task Manager (CPU usage)
+    
+    Solution B: Restart Excel
+    1. Force close Excel
+    2. Reopen workbook
+    3. Excel may recover auto-saved version
+    
+    Solution C: Repair Excel
+    1. Control Panel > Programs
+    2. Right-click Microsoft Office
+    3. Change > Repair
+    4. Follow prompts
+
+4.3 PROBLEM: File Size Too Large
+    
+    SYMPTOMS:
+    - Workbook over 50 MB
+    - Slow to save/open
+    - Email attachment issues
+    
+    SOLUTIONS:
+    
+    Solution A: Archive Old Data
+    1. Export data to CSV by month
+    2. Delete old data from workbook
+    3. Keep only current period
+    4. Save workbook
+    
+    Solution B: Remove Excess Formatting
+    1. Clear unused cells (Ctrl+Shift+End)
+    2. Delete empty rows far below data
+    3. Remove conditional formatting if not needed
+    4. Save workbook
+
+===================================================================
+SECTION 5: REPORT GENERATION ISSUES
+===================================================================
+
+5.1 PROBLEM: Report Generation Fails
+    
+    SYMPTOMS:
+    - Error when generating report
+    - No Report sheet created
+    - Empty report
+    
+    SOLUTIONS:
+    
+    Solution A: Check Date Format
+    1. Enter dates as YYYY-MM-DD
+    2. Example: 2025-01-01
+    3. Not MM/DD/YYYY or DD/MM/YYYY
+    4. Try again with correct format
+    
+    Solution B: Verify Date Range
+    1. Start date must be before end date
+    2. Dates must exist in your data
+    3. Check BiometricData sheet for date range
+    
+    Solution C: Run Manually
+    1. Create new sheet (Insert > Sheet)
+    2. Name it "Report"
+    3. Go to Calculations sheet
+    4. Filter by date range
+    5. Copy filtered data to Report sheet
+
+5.2 PROBLEM: Export to CSV Fails
+    
+    SYMPTOMS:
+    - Error during export
+    - Cannot save file
+    - Empty CSV file
+    
+    SOLUTIONS:
+    
+    Solution A: Check Save Location
+    1. Verify you have write permissions
+    2. Don't save to network drive if slow
+    3. Use local folder (Desktop)
+    4. Try again
+    
+    Solution B: Close File if Open
+    1. If previous export still open, close it
+    2. Don't open in Excel during export
+    3. Try export again
+    
+    Solution C: Manual Export
+    1. Go to Calculations sheet
+    2. Select all data
+    3. Copy (Ctrl+C)
+    4. Open new Excel file
+    5. Paste
+    6. Save As > CSV
+
+===================================================================
+SECTION 6: DISPLAY AND FORMATTING ISSUES
+===================================================================
+
+6.1 PROBLEM: Buttons Don't Display
+    
+    SYMPTOMS:
+    - Control Panel appears empty
+    - No button areas visible
+    
+    SOLUTIONS:
+    
+    Solution A: Check Zoom Level
+    1. View tab > Zoom
+    2. Set to 100%
+    3. Buttons should appear
+    
+    Solution B: Unhide Objects
+    1. File > Options > Advanced
+    2. Display options for this workbook
+    3. For objects, show: "All"
+    4. Click OK
+
+6.2 PROBLEM: Charts Don't Display
+    
+    SYMPTOMS:
+    - Dashboard charts missing
+    - Chart area blank
+    
+    SOLUTIONS:
+    
+    Solution A: Refresh Data
+    1. Click on chart area
+    2. Chart Tools > Design > Refresh Data
+    3. Or delete and recreate chart
+    
+    Solution B: Verify Data Source
+    1. Click chart
+    2. Chart Tools > Design > Select Data
+    3. Verify data ranges correct
+    4. Click OK
+
+6.3 PROBLEM: Text Appears Cut Off
+    
+    SYMPTOMS:
+    - Cell text truncated
+    - Numbers show as ######
+    
+    SOLUTIONS:
+    
+    Solution A: Widen Columns
+    1. Double-click column border
+    2. Auto-fits to content
+    3. Or manually drag wider
+    
+    Solution B: Wrap Text
+    1. Select cells
+    2. Home > Wrap Text
+    3. Cells expand vertically
+
+===================================================================
+SECTION 7: DATA VALIDATION ISSUES
+===================================================================
+
+7.1 PROBLEM: Validation Finds Too Many Errors
+    
+    SYMPTOMS:
+    - Many validation errors reported
+    - Unsure how to fix
+    
+    SOLUTIONS:
+    
+    Solution A: Fix Common Issues
+    1. Missing Employee IDs: Fill in or delete row
+    2. Invalid dates: Format as YYYY-MM-DD
+    3. Missing times: Fill in or delete row
+    4. Run validation again
+    
+    Solution B: Review Sample Data
+    1. Compare your data to sample_biometric_data.csv
+    2. Match format exactly
+    3. Fix discrepancies
+    
+    Solution C: Clean Data Systematically
+    1. Sort by error type
+    2. Fix all of one type first
+    3. Move to next error type
+    4. Validate after each fix
+
+7.2 PROBLEM: False Validation Errors
+    
+    SYMPTOMS:
+    - Validation reports errors but data looks correct
+    
+    SOLUTIONS:
+    
+    Solution A: Check Hidden Characters
+    1. Select cell with "error"
+    2. Check for extra spaces
+    3. Use TRIM function to clean
+    
+    Solution B: Verify Data Types
+    1. Numbers may be stored as text
+    2. Use Text to Columns to convert
+    3. Re-run validation
+
+===================================================================
+SECTION 8: COMPATIBILITY ISSUES
+===================================================================
+
+8.1 PROBLEM: Won't Open in Excel 2013
+    
+    SYMPTOMS:
+    - Error opening file
+    - Features not available
+    
+    SOLUTIONS:
+    
+    Solution A: Check Excel Version
+    1. File > Account > About Excel
+    2. Verify version 2013 or later
+    3. Update if older
+    
+    Solution B: Compatibility Mode
+    1. File > Info > Check for Issues
+    2. Check Compatibility
+    3. Review and fix issues
+
+8.2 PROBLEM: Mac Compatibility Issues
+    
+    SYMPTOMS:
+    - Features work differently on Mac
+    - Some buttons don't work
+    
+    SOLUTIONS:
+    
+    Solution A: Keyboard Shortcuts
+    - Alt+F11 becomes Option+F11
+    - Ctrl becomes Command
+    
+    Solution B: File Dialog Issues
+    1. File dialogs may look different
+    2. Functionality same
+    3. Navigate to file and select
+    
+    Solution C: VBA Differences
+    1. Some Windows VBA functions unavailable
+    2. Check VBA_Installation.txt for Mac notes
+
+===================================================================
+SECTION 9: BACKUP AND RECOVERY
+===================================================================
+
+9.1 PROBLEM: Workbook Corrupted
+    
+    SYMPTOMS:
+    - Cannot open file
+    - Error: "File is corrupted"
+    
+    SOLUTIONS:
+    
+    Solution A: Open and Repair
+    1. File > Open
+    2. Browse to file
+    3. Click dropdown next to Open button
+    4. Select "Open and Repair"
+    5. Try "Repair" first
+    
+    Solution B: Extract Data
+    1. If repair fails, try "Extract Data"
+    2. Saves what's recoverable
+    3. May lose formulas/formatting
+    
+    Solution C: Use Backup
+    1. Locate most recent backup
+    2. Open backup file
+    3. Re-enter any missing recent data
+
+9.2 PROBLEM: Lost Recent Changes
+    
+    SYMPTOMS:
+    - Recent data entry missing
+    - Reverted to older version
+    
+    SOLUTIONS:
+    
+    Solution A: Check AutoRecover
+    1. File > Info > Manage Workbook
+    2. Look for autosaved versions
+    3. Open most recent
+    4. Save immediately
+    
+    Solution B: Search for Temp Files
+    1. Open File Explorer
+    2. Search for: *.xlsm
+    3. Sort by date modified
+    4. Check recent Excel temp files
+
+===================================================================
+SECTION 10: GETTING ADDITIONAL HELP
+===================================================================
+
+10.1 BEFORE SEEKING HELP
+    
+    Checklist:
+    ✓ Read relevant documentation
+    ✓ Try solutions in this guide
+    ✓ Test with sample data
+    ✓ Note exact error messages
+    ✓ Document steps to reproduce issue
+    ✓ Check Excel version
+
+10.2 INFORMATION TO PROVIDE
+    
+    When seeking help, include:
+    - Excel version (File > Account > About)
+    - Operating system (Windows/Mac version)
+    - Exact error message
+    - Steps to reproduce issue
+    - What you've already tried
+    - Screenshots if applicable
+
+10.3 USEFUL RESOURCES
+    
+    Microsoft Support:
+    - Office Support: support.microsoft.com
+    - Excel Help: Excel > Help > Get Help
+    
+    Documentation:
+    - README.txt: System overview
+    - Setup_Guide.txt: Installation steps
+    - VBA_Installation.txt: Macro help
+    
+    Online Resources:
+    - Excel forums: answers.microsoft.com
+    - VBA tutorials: ExcelEasy.com
+    - YouTube tutorials: Search "Excel VBA"
+
+===================================================================
+SECTION 11: PREVENTIVE MEASURES
+===================================================================
+
+11.1 AVOID COMMON PROBLEMS
+    
+    Best Practices:
+    ✓ Save regularly (Ctrl+S)
+    ✓ Keep backups (daily/weekly)
+    ✓ Test with sample data first
+    ✓ Validate data before import
+    ✓ Use provided templates
+    ✓ Don't modify formula structure
+    ✓ Keep macros enabled
+    ✓ Use latest Excel version
+    ✓ Update Windows/Mac regularly
+    ✓ Maintain file in trusted location
+
+11.2 REGULAR MAINTENANCE
+    
+    Weekly:
+    - Backup workbook
+    - Export data to CSV
+    - Clear old data if needed
+    - Test macros
+    
+    Monthly:
+    - Archive old data
+    - Check file size
+    - Verify all formulas working
+    - Update documentation
+    - Create fresh copy from template
+
+===================================================================
+QUICK TROUBLESHOOTING CHECKLIST
+===================================================================
+
+Before anything else, try these:
+□ Save and close workbook
+□ Reopen workbook
+□ Enable macros if prompted
+□ Click "Refresh All" button
+□ Press F9 to recalculate
+□ Check BiometricData has data
+□ Verify Settings sheet values
+□ Test with sample CSV
+□ Restart Excel
+□ Restart computer
+
+If problem persists:
+□ Check relevant section in this guide
+□ Review error message carefully
+□ Try with ShiftGuard_Template.xlsx
+□ Check documentation
+□ Verify Excel version compatibility
+
+===================================================================
+END OF TROUBLESHOOTING GUIDE
+===================================================================

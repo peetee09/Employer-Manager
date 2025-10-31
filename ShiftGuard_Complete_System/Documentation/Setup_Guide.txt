@@ -1,0 +1,385 @@
+===================================================================
+SHIFTGUARD SETUP GUIDE
+===================================================================
+Complete Step-by-Step Installation and Configuration Instructions
+
+===================================================================
+SECTION 1: SYSTEM PREPARATION
+===================================================================
+
+1.1 EXTRACT FILES
+    Step 1: Download ShiftGuard_Complete_System.zip
+    Step 2: Right-click the ZIP file
+    Step 3: Select "Extract All..."
+    Step 4: Choose destination folder (e.g., C:\ShiftGuard)
+    Step 5: Click "Extract"
+
+1.2 VERIFY FILE STRUCTURE
+    After extraction, verify you have these folders:
+    ✓ Excel_Files (contains .xlsm and .xlsx files)
+    ✓ Power_BI (contains Power BI setup guide)
+    ✓ Documentation (contains all guides)
+    ✓ Sample_Data (contains CSV sample file)
+    ✓ Setup_Assistant.bat (in root folder)
+
+===================================================================
+SECTION 2: EXCEL WORKBOOK SETUP
+===================================================================
+
+2.1 OPEN THE WORKBOOK
+    Step 1: Navigate to Excel_Files folder
+    Step 2: Double-click ShiftGuard_System.xlsm
+    Step 3: Excel will open with a security warning
+
+2.2 ENABLE MACROS
+    For Excel 2016/2019/365 (Windows):
+    Step 1: Yellow security bar appears at top
+    Step 2: Click "Enable Content" button
+    Step 3: Workbook will refresh with macros enabled
+
+    For Excel 2016/2019/365 (Mac):
+    Step 1: Click "Enable Macros" when prompted
+    Step 2: If not prompted, go to Excel > Preferences > Security
+    Step 3: Set macro security to "Enable all macros"
+    Step 4: Close and reopen the workbook
+
+    For Excel 2013:
+    Step 1: Click "Enable Content" in the security warning
+    Step 2: If blocked, go to File > Options > Trust Center
+    Step 3: Click "Trust Center Settings"
+    Step 4: Select "Macro Settings"
+    Step 5: Choose "Enable all macros"
+    Step 6: Close and reopen workbook
+
+2.3 VERIFY SETUP
+    Step 1: Go to ControlPanel sheet
+    Step 2: Check if all button areas are visible
+    Step 3: System Status should show "System Version: 1.0.0"
+    Step 4: Go to Dashboard sheet
+    Step 5: Verify KPI section displays properly
+
+===================================================================
+SECTION 3: INITIAL CONFIGURATION
+===================================================================
+
+3.1 CUSTOMIZE SETTINGS
+    Step 1: Open the Settings sheet
+    Step 2: Review default values:
+            - Expected Hours/Day: 7.5
+            - Workdays/Week: 5
+            - Workdays/Month: 22
+    Step 3: Modify values to match your organization
+    Step 4: Update break times if needed
+    Step 5: Adjust alert thresholds as required
+    Step 6: Save the workbook (Ctrl+S)
+
+3.2 CONFIGURE DEPARTMENTS
+    Step 1: Go to BiometricData sheet
+    Step 2: Note the Department column (Column G)
+    Step 3: List of supported departments:
+            - Operations
+            - Security
+            - IT
+            - HR
+            - Finance
+    Step 4: To add departments, edit Dashboard formulas
+    Step 5: Update department performance section
+
+3.3 CONFIGURE SHIFT TYPES
+    Supported shift types:
+    - Day: 08:00 - 16:00
+    - Night: 19:00 - 03:00
+    - Evening: 14:00 - 22:00
+    
+    To modify:
+    Step 1: Update Settings sheet values
+    Step 2: Adjust night shift start/end times
+    Step 3: Modify night allowance percentage
+
+===================================================================
+SECTION 4: DATA IMPORT
+===================================================================
+
+4.1 PREPARE YOUR DATA
+    Step 1: Ensure CSV file follows required format:
+            Employee ID,Date,Clock-In,Clock-Out,Tea Break,Lunch Break,Department,Shift Type
+    Step 2: Use sample_biometric_data.csv as reference
+    Step 3: Verify data types:
+            - Date: YYYY-MM-DD
+            - Time: HH:MM (24-hour format)
+            - Breaks: Numeric (minutes)
+    Step 4: Save as .csv file
+
+4.2 IMPORT DATA USING VBA MACRO
+    Step 1: Open ShiftGuard_System.xlsm
+    Step 2: Go to ControlPanel sheet
+    Step 3: Click "Upload Biometric Data" button
+    Step 4: File dialog opens
+    Step 5: Navigate to your CSV file
+    Step 6: Select file and click "Open"
+    Step 7: Wait for success message
+    Step 8: Data appears in BiometricData sheet
+
+4.3 IMPORT DATA MANUALLY (ALTERNATIVE)
+    Step 1: Open CSV file in Excel
+    Step 2: Select all data (Ctrl+A)
+    Step 3: Copy (Ctrl+C)
+    Step 4: Open ShiftGuard_System.xlsm
+    Step 5: Go to BiometricData sheet
+    Step 6: Click cell A2 (first data row)
+    Step 7: Paste (Ctrl+V)
+    Step 8: Go to ControlPanel
+    Step 9: Click "Refresh All" button
+
+===================================================================
+SECTION 5: TESTING THE SYSTEM
+===================================================================
+
+5.1 TEST WITH SAMPLE DATA
+    Step 1: Use provided sample_biometric_data.csv
+    Step 2: Import using Upload button
+    Step 3: Go to Calculations sheet
+    Step 4: Verify formulas calculate correctly
+    Step 5: Check Dashboard for updated metrics
+
+5.2 VERIFY CALCULATIONS
+    Calculations to verify:
+    ✓ Worked Hours = Clock-Out - Clock-In - Breaks
+    ✓ Lost Time = Expected Hours - Worked Hours (if negative = 0)
+    ✓ Overtime = Worked Hours - Expected Hours (if negative = 0)
+    ✓ Utilization % = (Worked Hours / Expected Hours) × 100
+    
+    Step 1: Pick a sample row from BiometricData
+    Step 2: Manually calculate expected values
+    Step 3: Compare with Calculations sheet results
+    Step 4: Verify Dashboard KPIs update
+
+5.3 TEST VBA MACROS
+    Test each macro:
+    
+    ✓ Upload Biometric Data
+      - Select sample CSV file
+      - Verify data imports correctly
+      - Check row count increases
+    
+    ✓ Generate Report
+      - Enter date range (e.g., 2025-01-01 to 2025-01-03)
+      - Verify new Report sheet created
+      - Check filtered data appears
+    
+    ✓ Export Data to CSV
+      - Choose save location
+      - Open exported file
+      - Verify data matches Calculations sheet
+    
+    ✓ Refresh Dashboard
+      - Make a manual change to data
+      - Click Refresh Dashboard
+      - Verify metrics update
+    
+    ✓ Validate Data
+      - Run validation
+      - Should pass with sample data
+      - Test with intentional errors
+    
+    ✓ Refresh All
+      - Recalculates entire workbook
+      - Verify all sheets update
+
+===================================================================
+SECTION 6: DAILY OPERATIONS
+===================================================================
+
+6.1 DAILY WORKFLOW
+    Morning:
+    1. Export biometric data from your time clock system
+    2. Save as CSV in required format
+    3. Open ShiftGuard workbook
+    4. Upload new data
+    5. Review Dashboard for alerts
+
+    End of Day:
+    1. Run Validate Data to check for errors
+    2. Review Calculations sheet
+    3. Address any alerts or issues
+    4. Export data if needed for records
+
+6.2 WEEKLY TASKS
+    1. Generate weekly report
+    2. Review department performance
+    3. Check overtime trends
+    4. Analyze utilization rates
+    5. Export summary for management
+
+6.3 MONTHLY TASKS
+    1. Generate monthly report
+    2. Archive data (export to CSV)
+    3. Create backup of workbook
+    4. Review Settings for any needed adjustments
+    5. Clear old data if necessary
+
+===================================================================
+SECTION 7: BACKUP AND MAINTENANCE
+===================================================================
+
+7.1 BACKUP STRATEGY
+    Daily Backup:
+    - Save workbook with date: ShiftGuard_YYYYMMDD.xlsm
+    - Store in backup folder
+    
+    Weekly Backup:
+    - Export all data to CSV
+    - Create full system backup
+    - Store off-site or cloud storage
+    
+    Monthly Backup:
+    - Archive previous month's data
+    - Create new workbook for current month
+    - Keep template file safe
+
+7.2 DATA MAINTENANCE
+    When to clear data:
+    - After archiving (monthly/quarterly)
+    - When workbook becomes slow (>10,000 rows)
+    - After exporting historical data
+    
+    How to clear data:
+    Step 1: Export all data to CSV first
+    Step 2: Go to BiometricData sheet
+    Step 3: Select rows 2 to last row
+    Step 4: Right-click > Delete rows
+    Step 5: Go to Calculations sheet
+    Step 6: Repeat deletion process
+    Step 7: Save workbook
+
+7.3 TROUBLESHOOTING PERFORMANCE
+    If workbook is slow:
+    1. Reduce data rows (archive old data)
+    2. Disable automatic calculation temporarily
+       - Go to Formulas > Calculation Options
+       - Select "Manual"
+    3. Close unused sheets
+    4. Save and reopen workbook
+    5. Ensure macros are enabled
+
+===================================================================
+SECTION 8: ADVANCED CONFIGURATION
+===================================================================
+
+8.1 CUSTOMIZING FORMULAS
+    To modify calculations:
+    Step 1: Go to Calculations sheet
+    Step 2: Click on formula cell
+    Step 3: Edit in formula bar
+    Step 4: Press Enter
+    Step 5: Copy formula down to all rows
+    Step 6: Test with sample data
+
+8.2 ADDING NEW METRICS
+    To add custom KPIs:
+    Step 1: Add column in Calculations sheet
+    Step 2: Create formula for new metric
+    Step 3: Update Dashboard sheet
+    Step 4: Add new cell for metric display
+    Step 5: Link to Calculations data
+    Step 6: Format appropriately
+
+8.3 MODIFYING VBA MACROS
+    Step 1: Press Alt+F11 to open VBA Editor
+    Step 2: Locate macro module
+    Step 3: Edit code as needed
+    Step 4: Save changes (Ctrl+S)
+    Step 5: Close VBA Editor
+    Step 6: Test modified macro
+    Step 7: Keep VBA_Code.txt updated
+
+===================================================================
+SECTION 9: POWER BI INTEGRATION
+===================================================================
+
+9.1 PREPARING DATA FOR POWER BI
+    Step 1: Save workbook in accessible location
+    Step 2: Ensure all data is up to date
+    Step 3: Run "Refresh All" macro
+    Step 4: Note file path for Power BI connection
+    Step 5: Refer to Power_BI_Setup.txt for details
+
+9.2 CONNECTING POWER BI
+    (See Power_BI/Power_BI_Setup.txt for complete instructions)
+    - Use "Get Data" > Excel
+    - Select ShiftGuard_System.xlsm
+    - Choose relevant sheets
+    - Apply transformations as needed
+
+===================================================================
+SECTION 10: USER TRAINING
+===================================================================
+
+10.1 BASIC USER TRAINING (30 minutes)
+     - Opening and enabling macros
+     - Navigating sheets
+     - Using ControlPanel buttons
+     - Reading Dashboard metrics
+     - Understanding alerts
+
+10.2 ADVANCED USER TRAINING (1 hour)
+     - Manual data entry
+     - Report generation
+     - Data validation
+     - Exporting data
+     - Troubleshooting basic issues
+
+10.3 ADMINISTRATOR TRAINING (2 hours)
+     - System configuration
+     - Settings customization
+     - Formula understanding
+     - VBA macro basics
+     - Backup and maintenance
+     - Power BI integration
+
+===================================================================
+SECTION 11: GETTING HELP
+===================================================================
+
+If you encounter issues:
+1. Check Troubleshooting.txt for common solutions
+2. Review VBA_Installation.txt for macro issues
+3. Verify file format and data structure
+4. Test with sample data first
+5. Check Excel version compatibility
+
+For technical questions:
+- Review all documentation files
+- Test with provided sample data
+- Check Excel macro security settings
+- Verify workbook is not corrupted
+
+===================================================================
+SECTION 12: QUICK REFERENCE
+===================================================================
+
+KEYBOARD SHORTCUTS:
+Ctrl+S          Save workbook
+Ctrl+Home       Go to cell A1
+Ctrl+End        Go to last used cell
+Alt+F11         Open VBA Editor
+F9              Recalculate formulas
+Ctrl+PageUp     Previous sheet
+Ctrl+PageDown   Next sheet
+
+COMMON FILE LOCATIONS:
+Templates:      Excel_Files/ShiftGuard_Template.xlsx
+Sample Data:    Sample_Data/sample_biometric_data.csv
+VBA Code:       Excel_Files/VBA_Code.txt
+Documentation:  Documentation/ folder
+
+SUPPORT FILES:
+README.txt              System overview
+Setup_Guide.txt         This file
+VBA_Installation.txt    Macro setup
+Troubleshooting.txt     Problem solving
+Power_BI_Setup.txt      Power BI guide
+
+===================================================================
+END OF SETUP GUIDE
+===================================================================
