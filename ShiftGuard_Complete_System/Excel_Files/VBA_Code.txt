@@ -1,0 +1,395 @@
+===================================================================
+SHIFTGUARD VBA MACRO CODE
+===================================================================
+
+Instructions: Copy and paste this code into the VBA Editor in Excel
+1. Press Alt+F11 to open VBA Editor
+2. Insert > Module
+3. Paste all code below
+4. Save as .xlsm (macro-enabled workbook)
+
+===================================================================
+
+' ===================================================================
+' MODULE: ShiftGuardMacros
+' PURPOSE: Employee Time Tracking System Automation
+' ===================================================================
+
+Option Explicit
+
+' ===================================================================
+' MACRO: UploadBiometricData
+' PURPOSE: Import biometric data from CSV files
+' ===================================================================
+Sub UploadBiometricData()
+    Dim wsData As Worksheet
+    Dim filePath As String
+    Dim fileDialog As fileDialog
+    Dim textLine As String
+    Dim dataArray() As String
+    Dim lastRow As Long
+    Dim rowNum As Long
+    Dim fileNum As Integer
+    
+    On Error GoTo ErrorHandler
+    
+    ' Set reference to BiometricData sheet
+    Set wsData = ThisWorkbook.Sheets("BiometricData")
+    
+    ' Create file dialog
+    Set fileDialog = Application.fileDialog(msoFileDialogFilePicker)
+    With fileDialog
+        .Title = "Select Biometric Data CSV File"
+        .Filters.Clear
+        .Filters.Add "CSV Files", "*.csv"
+        .AllowMultiSelect = False
+        
+        If .Show = -1 Then
+            filePath = .SelectedItems(1)
+        Else
+            MsgBox "No file selected. Upload cancelled.", vbInformation
+            Exit Sub
+        End If
+    End With
+    
+    ' Find last row with data
+    lastRow = wsData.Cells(wsData.Rows.Count, 1).End(xlUp).Row
+    
+    ' Open and read CSV file
+    fileNum = FreeFile
+    Open filePath For Input As #fileNum
+    
+    ' Skip header line
+    Line Input #fileNum, textLine
+    
+    ' Read data
+    rowNum = lastRow + 1
+    Do Until EOF(fileNum)
+        Line Input #fileNum, textLine
+        dataArray = Split(textLine, ",")
+        
+        ' Write data to sheet
+        If UBound(dataArray) >= 7 Then
+            wsData.Cells(rowNum, 1).Value = Trim(dataArray(0))  ' Employee ID
+            wsData.Cells(rowNum, 2).Value = Trim(dataArray(1))  ' Date
+            wsData.Cells(rowNum, 3).Value = Trim(dataArray(2))  ' Clock-In
+            wsData.Cells(rowNum, 4).Value = Trim(dataArray(3))  ' Clock-Out
+            wsData.Cells(rowNum, 5).Value = Trim(dataArray(4))  ' Tea Break
+            wsData.Cells(rowNum, 6).Value = Trim(dataArray(5))  ' Lunch Break
+            wsData.Cells(rowNum, 7).Value = Trim(dataArray(6))  ' Department
+            wsData.Cells(rowNum, 8).Value = Trim(dataArray(7))  ' Shift Type
+            
+            rowNum = rowNum + 1
+        End If
+    Loop
+    
+    Close #fileNum
+    
+    ' Update status
+    UpdateSystemStatus "Data Upload", Now
+    
+    ' Refresh calculations
+    Call UpdateDashboard
+    
+    MsgBox "Data imported successfully!" & vbCrLf & _
+           "Records added: " & (rowNum - lastRow - 1), vbInformation, "Upload Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    Close #fileNum
+    MsgBox "Error uploading data: " & Err.Description, vbCritical, "Upload Error"
+End Sub
+
+' ===================================================================
+' MACRO: GenerateAutomatedReport
+' PURPOSE: Create automated reports for selected period
+' ===================================================================
+Sub GenerateAutomatedReport()
+    Dim wsCalc As Worksheet
+    Dim wsReport As Worksheet
+    Dim startDate As Date
+    Dim endDate As Date
+    Dim lastRow As Long
+    Dim i As Long
+    Dim reportRow As Long
+    
+    On Error GoTo ErrorHandler
+    
+    ' Get date range from user
+    startDate = InputBox("Enter start date (YYYY-MM-DD):", "Report Date Range")
+    endDate = InputBox("Enter end date (YYYY-MM-DD):", "Report Date Range")
+    
+    If Not IsDate(startDate) Or Not IsDate(endDate) Then
+        MsgBox "Invalid date format. Please use YYYY-MM-DD format.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Create or clear report sheet
+    On Error Resume Next
+    Set wsReport = ThisWorkbook.Sheets("Report")
+    If wsReport Is Nothing Then
+        Set wsReport = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        wsReport.Name = "Report"
+    Else
+        wsReport.Cells.Clear
+    End If
+    On Error GoTo ErrorHandler
+    
+    Set wsCalc = ThisWorkbook.Sheets("Calculations")
+    
+    ' Create report headers
+    With wsReport
+        .Cells(1, 1).Value = "ShiftGuard Employee Report"
+        .Cells(1, 1).Font.Bold = True
+        .Cells(1, 1).Font.Size = 14
+        .Cells(2, 1).Value = "Period: " & Format(startDate, "DD-MMM-YYYY") & " to " & Format(endDate, "DD-MMM-YYYY")
+        .Cells(2, 1).Font.Italic = True
+        
+        .Cells(4, 1).Value = "Employee ID"
+        .Cells(4, 2).Value = "Date"
+        .Cells(4, 3).Value = "Worked Hours"
+        .Cells(4, 4).Value = "Lost Time"
+        .Cells(4, 5).Value = "Overtime"
+        .Cells(4, 6).Value = "Status"
+        
+        ' Format headers
+        .Range("A4:F4").Font.Bold = True
+        .Range("A4:F4").Interior.Color = RGB(68, 114, 196)
+        .Range("A4:F4").Font.Color = RGB(255, 255, 255)
+    End With
+    
+    ' Copy filtered data to report
+    lastRow = wsCalc.Cells(wsCalc.Rows.Count, 1).End(xlUp).Row
+    reportRow = 5
+    
+    For i = 2 To lastRow
+        If IsDate(wsCalc.Cells(i, 2).Value) Then
+            If wsCalc.Cells(i, 2).Value >= startDate And wsCalc.Cells(i, 2).Value <= endDate Then
+                wsReport.Cells(reportRow, 1).Value = wsCalc.Cells(i, 1).Value
+                wsReport.Cells(reportRow, 2).Value = wsCalc.Cells(i, 2).Value
+                wsReport.Cells(reportRow, 3).Value = wsCalc.Cells(i, 3).Value
+                wsReport.Cells(reportRow, 4).Value = wsCalc.Cells(i, 4).Value
+                wsReport.Cells(reportRow, 5).Value = wsCalc.Cells(i, 5).Value
+                wsReport.Cells(reportRow, 6).Value = wsCalc.Cells(i, 8).Value
+                reportRow = reportRow + 1
+            End If
+        End If
+    Next i
+    
+    ' Auto-fit columns
+    wsReport.Columns("A:F").AutoFit
+    
+    ' Activate report sheet
+    wsReport.Activate
+    
+    MsgBox "Report generated successfully with " & (reportRow - 5) & " records.", vbInformation, "Report Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error generating report: " & Err.Description, vbCritical, "Report Error"
+End Sub
+
+' ===================================================================
+' MACRO: ExportDataToCSV
+' PURPOSE: Export processed data to CSV format
+' ===================================================================
+Sub ExportDataToCSV()
+    Dim wsCalc As Worksheet
+    Dim filePath As String
+    Dim fileNum As Integer
+    Dim lastRow As Long
+    Dim i As Long
+    Dim line As String
+    
+    On Error GoTo ErrorHandler
+    
+    Set wsCalc = ThisWorkbook.Sheets("Calculations")
+    
+    ' Get save location from user
+    filePath = Application.GetSaveAsFilename( _
+        InitialFileName:="ShiftGuard_Export_" & Format(Now, "YYYYMMDD") & ".csv", _
+        FileFilter:="CSV Files (*.csv), *.csv", _
+        Title:="Export Data to CSV")
+    
+    If filePath = "False" Then
+        MsgBox "Export cancelled.", vbInformation
+        Exit Sub
+    End If
+    
+    ' Open file for writing
+    fileNum = FreeFile
+    Open filePath For Output As #fileNum
+    
+    ' Write header
+    Print #fileNum, "Employee ID,Date,Worked Hours,Lost Time,Overtime,Night Hours,Utilization %,Status"
+    
+    ' Write data
+    lastRow = wsCalc.Cells(wsCalc.Rows.Count, 1).End(xlUp).Row
+    For i = 2 To lastRow
+        If wsCalc.Cells(i, 1).Value <> "" Then
+            line = wsCalc.Cells(i, 1).Value & "," & _
+                   wsCalc.Cells(i, 2).Value & "," & _
+                   wsCalc.Cells(i, 3).Value & "," & _
+                   wsCalc.Cells(i, 4).Value & "," & _
+                   wsCalc.Cells(i, 5).Value & "," & _
+                   wsCalc.Cells(i, 6).Value & "," & _
+                   wsCalc.Cells(i, 7).Value & "," & _
+                   wsCalc.Cells(i, 8).Value
+            Print #fileNum, line
+        End If
+    Next i
+    
+    Close #fileNum
+    
+    MsgBox "Data exported successfully to:" & vbCrLf & filePath, vbInformation, "Export Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    Close #fileNum
+    MsgBox "Error exporting data: " & Err.Description, vbCritical, "Export Error"
+End Sub
+
+' ===================================================================
+' MACRO: UpdateDashboard
+' PURPOSE: Refresh all calculations and dashboard metrics
+' ===================================================================
+Sub UpdateDashboard()
+    On Error GoTo ErrorHandler
+    
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationAutomatic
+    
+    ' Force recalculation
+    ThisWorkbook.Sheets("Calculations").Calculate
+    ThisWorkbook.Sheets("Dashboard").Calculate
+    
+    ' Update status
+    UpdateSystemStatus "Dashboard Refresh", Now
+    
+    Application.ScreenUpdating = True
+    
+    MsgBox "Dashboard refreshed successfully!", vbInformation, "Refresh Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    Application.ScreenUpdating = True
+    MsgBox "Error updating dashboard: " & Err.Description, vbCritical, "Update Error"
+End Sub
+
+' ===================================================================
+' MACRO: ValidateData
+' PURPOSE: Perform data quality checks
+' ===================================================================
+Sub ValidateData()
+    Dim wsData As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim errorCount As Long
+    Dim errorMsg As String
+    
+    On Error GoTo ErrorHandler
+    
+    Set wsData = ThisWorkbook.Sheets("BiometricData")
+    lastRow = wsData.Cells(wsData.Rows.Count, 1).End(xlUp).Row
+    
+    errorCount = 0
+    errorMsg = "Data Validation Results:" & vbCrLf & vbCrLf
+    
+    ' Check for missing employee IDs
+    For i = 2 To lastRow
+        If wsData.Cells(i, 1).Value = "" Then
+            errorCount = errorCount + 1
+            errorMsg = errorMsg & "Row " & i & ": Missing Employee ID" & vbCrLf
+        End If
+    Next i
+    
+    ' Check for invalid dates
+    For i = 2 To lastRow
+        If wsData.Cells(i, 2).Value <> "" And Not IsDate(wsData.Cells(i, 2).Value) Then
+            errorCount = errorCount + 1
+            errorMsg = errorMsg & "Row " & i & ": Invalid Date" & vbCrLf
+        End If
+    Next i
+    
+    ' Check for missing clock times
+    For i = 2 To lastRow
+        If wsData.Cells(i, 1).Value <> "" Then
+            If wsData.Cells(i, 3).Value = "" Or wsData.Cells(i, 4).Value = "" Then
+                errorCount = errorCount + 1
+                errorMsg = errorMsg & "Row " & i & ": Missing Clock-In/Out time" & vbCrLf
+            End If
+        End If
+    Next i
+    
+    If errorCount = 0 Then
+        MsgBox "Data validation passed! No errors found.", vbInformation, "Validation Complete"
+    Else
+        MsgBox errorMsg & vbCrLf & "Total Errors: " & errorCount, vbExclamation, "Validation Errors"
+    End If
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error validating data: " & Err.Description, vbCritical, "Validation Error"
+End Sub
+
+' ===================================================================
+' MACRO: RefreshAllData
+' PURPOSE: Complete system refresh
+' ===================================================================
+Sub RefreshAllData()
+    On Error GoTo ErrorHandler
+    
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationAutomatic
+    
+    ' Recalculate all sheets
+    ThisWorkbook.Sheets("BiometricData").Calculate
+    ThisWorkbook.Sheets("Settings").Calculate
+    ThisWorkbook.Sheets("Calculations").Calculate
+    ThisWorkbook.Sheets("Dashboard").Calculate
+    
+    ' Update control panel status
+    UpdateSystemStatus "Complete Refresh", Now
+    
+    Application.ScreenUpdating = True
+    
+    MsgBox "Complete system refresh finished!", vbInformation, "Refresh Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    Application.ScreenUpdating = True
+    MsgBox "Error refreshing system: " & Err.Description, vbCritical, "Refresh Error"
+End Sub
+
+' ===================================================================
+' HELPER: UpdateSystemStatus
+' PURPOSE: Update system status on Control Panel
+' ===================================================================
+Private Sub UpdateSystemStatus(action As String, timestamp As Date)
+    Dim wsControl As Worksheet
+    
+    On Error Resume Next
+    Set wsControl = ThisWorkbook.Sheets("ControlPanel")
+    
+    If Not wsControl Is Nothing Then
+        Select Case action
+            Case "Data Upload"
+                wsControl.Range("C25").Value = Format(timestamp, "DD-MMM-YYYY HH:MM")
+                wsControl.Range("C26").Value = ThisWorkbook.Sheets("BiometricData").Cells(Rows.Count, 1).End(xlUp).Row - 1
+            Case "Dashboard Refresh", "Complete Refresh"
+                wsControl.Range("C27").Value = Format(timestamp, "DD-MMM-YYYY HH:MM")
+        End Select
+    End If
+    
+    On Error GoTo 0
+End Sub
+
+' ===================================================================
+' END OF VBA CODE
+' ===================================================================

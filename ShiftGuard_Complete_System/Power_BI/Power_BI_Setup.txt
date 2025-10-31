@@ -1,0 +1,593 @@
+===================================================================
+POWER BI INTEGRATION GUIDE
+===================================================================
+Connect ShiftGuard Excel Data to Power BI for Advanced Analytics
+
+===================================================================
+SECTION 1: OVERVIEW
+===================================================================
+
+Power BI Integration Benefits:
+✓ Interactive dashboards and visualizations
+✓ Real-time data refresh capabilities
+✓ Advanced analytics and insights
+✓ Mobile access to reports
+✓ Share reports with stakeholders
+✓ Automated report distribution
+
+Prerequisites:
+- Power BI Desktop (free download)
+- ShiftGuard Excel workbook
+- Basic understanding of Power BI
+
+===================================================================
+SECTION 2: INSTALLING POWER BI DESKTOP
+===================================================================
+
+2.1 DOWNLOAD POWER BI DESKTOP
+    Step 1: Visit https://powerbi.microsoft.com/desktop
+    Step 2: Click "Download Free"
+    Step 3: Save installer to your computer
+    Step 4: Run installer
+    Step 5: Follow installation wizard
+    Step 6: Launch Power BI Desktop
+
+2.2 SYSTEM REQUIREMENTS
+    Minimum:
+    - Windows 8.1 / Windows Server 2012 R2 or later
+    - 1 GB RAM (2 GB+ recommended)
+    - 1024x768 display resolution
+    - .NET Framework 4.5 or later
+    
+    Note: Power BI Desktop is Windows-only
+    Mac users: Use Power BI service (web version)
+
+===================================================================
+SECTION 3: CONNECTING EXCEL TO POWER BI
+===================================================================
+
+3.1 PREPARE EXCEL WORKBOOK
+    Step 1: Open ShiftGuard_System.xlsm
+    Step 2: Click "Refresh All" on ControlPanel
+    Step 3: Verify all data is up to date
+    Step 4: Save workbook (Ctrl+S)
+    Step 5: Note file location path
+    Step 6: Close Excel (important for connection)
+
+3.2 CONNECT FROM POWER BI
+    Step 1: Open Power BI Desktop
+    Step 2: Click "Get Data" on ribbon
+    Step 3: Select "Excel" from list
+    Step 4: Click "Connect"
+    Step 5: Browse to ShiftGuard_System.xlsm
+    Step 6: Click "Open"
+    Step 7: Navigator window appears
+
+3.3 SELECT DATA TABLES
+    In Navigator window:
+    
+    Step 1: Check these sheets:
+    ✓ BiometricData
+    ✓ Settings
+    ✓ Calculations
+    ✓ Dashboard
+    
+    Step 2: Preview appears on right
+    Step 3: Click "Transform Data" (opens Power Query)
+    OR
+    Step 3: Click "Load" (direct load)
+    
+    Recommendation: Use "Transform Data" for cleaning
+
+===================================================================
+SECTION 4: POWER QUERY TRANSFORMATIONS
+===================================================================
+
+4.1 CLEANING BIOMETRICDATA TABLE
+    
+    Transform Clock-In/Out to DateTime:
+    Step 1: Select "Clock-In" column
+    Step 2: Transform > Data Type > Time
+    Step 3: Repeat for "Clock-Out" column
+    
+    Format Date Column:
+    Step 1: Select "Date" column
+    Step 2: Transform > Data Type > Date
+    
+    Remove Empty Rows:
+    Step 1: Select "Employee ID" column
+    Step 2: Home > Remove Rows > Remove Empty
+    
+    Rename Table:
+    Step 1: Properties pane on right
+    Step 2: Name: "EmployeeAttendance"
+
+4.2 CLEANING CALCULATIONS TABLE
+    
+    Step 1: Select "Worked Hours" column
+    Step 2: Transform > Data Type > Decimal Number
+    Step 3: Repeat for numeric columns:
+            - Lost Time
+            - Overtime
+            - Night Hours
+            - Utilization %
+    
+    Filter Valid Records:
+    Step 1: Select "Employee ID" column
+    Step 2: Filter > Remove Empty
+    
+    Rename Table:
+    Step 1: Name: "EmployeeMetrics"
+
+4.3 APPLY AND LOAD
+    Step 1: Review all transformations
+    Step 2: Click "Close & Apply"
+    Step 3: Data loads into Power BI
+    Step 4: Tables appear in Fields pane
+
+===================================================================
+SECTION 5: CREATING RELATIONSHIPS
+===================================================================
+
+5.1 VIEW DATA MODEL
+    Step 1: Click "Model" view (left sidebar)
+    Step 2: See all loaded tables
+    Step 3: Drag to arrange
+
+5.2 CREATE RELATIONSHIPS
+    
+    Relationship 1: BiometricData to Calculations
+    Step 1: Drag "Employee ID" from BiometricData
+    Step 2: Drop on "Employee ID" in Calculations
+    Step 3: Relationship created automatically
+    Step 4: Verify: One-to-Many relationship
+    
+    Alternative Manual Method:
+    Step 1: Home > Manage Relationships
+    Step 2: Click "New"
+    Step 3: Table 1: BiometricData, Column: Employee ID
+    Step 4: Table 2: Calculations, Column: Employee ID
+    Step 5: Cardinality: Many to One
+    Step 6: Click OK
+
+===================================================================
+SECTION 6: CREATING DAX MEASURES
+===================================================================
+
+6.1 ESSENTIAL MEASURES
+    
+    In Report view, create these measures:
+    
+    Total Employees:
+    Step 1: Home > New Measure
+    Step 2: Enter formula:
+    
+    Total Employees = DISTINCTCOUNT(EmployeeAttendance[Employee ID])
+    
+    Step 3: Press Enter
+    
+    Total Worked Hours:
+    Total Worked Hours = SUM(EmployeeMetrics[Worked Hours])
+    
+    Average Utilization:
+    Average Utilization = AVERAGE(EmployeeMetrics[Utilization %])
+    
+    Total Overtime:
+    Total Overtime = SUM(EmployeeMetrics[Overtime (hrs)])
+    
+    Total Lost Time:
+    Total Lost Time = SUM(EmployeeMetrics[Lost Time (hrs)])
+    
+    Low Utilization Count:
+    Low Utilization Count = 
+    CALCULATE(
+        COUNTROWS(EmployeeMetrics),
+        EmployeeMetrics[Status] = "Low Utilization"
+    )
+    
+    Overtime Alert Count:
+    Overtime Alert Count = 
+    CALCULATE(
+        COUNTROWS(EmployeeMetrics),
+        EmployeeMetrics[Status] = "Excessive Overtime"
+    )
+    
+    Night Shift Hours:
+    Night Shift Hours = SUM(EmployeeMetrics[Night Hours])
+
+6.2 ADVANCED MEASURES
+    
+    Utilization Trend:
+    Utilization Trend = 
+    VAR CurrentPeriod = [Average Utilization]
+    VAR PreviousPeriod = 
+        CALCULATE(
+            [Average Utilization],
+            DATEADD(EmployeeAttendance[Date], -7, DAY)
+        )
+    RETURN
+    CurrentPeriod - PreviousPeriod
+    
+    Department Performance Score:
+    Dept Performance = 
+    ([Average Utilization] * 0.6) + 
+    ((100 - ([Total Lost Time] / [Total Worked Hours] * 100)) * 0.4)
+
+6.3 TIME INTELLIGENCE MEASURES
+    
+    First, create Date Table:
+    Date Table = 
+    ADDCOLUMNS(
+        CALENDAR(DATE(2025,1,1), DATE(2025,12,31)),
+        "Year", YEAR([Date]),
+        "Month", FORMAT([Date], "MMM"),
+        "MonthNum", MONTH([Date]),
+        "Quarter", "Q" & QUARTER([Date]),
+        "Weekday", FORMAT([Date], "ddd")
+    )
+    
+    Mark as Date Table:
+    Step 1: Select Date Table
+    Step 2: Table Tools > Mark as Date Table
+    Step 3: Select Date column
+    
+    Then create time measures:
+    
+    YTD Hours:
+    YTD Hours = TOTALYTD([Total Worked Hours], 'Date Table'[Date])
+    
+    Previous Month Hours:
+    Previous Month = 
+    CALCULATE(
+        [Total Worked Hours],
+        DATEADD('Date Table'[Date], -1, MONTH)
+    )
+    
+    Month over Month Growth:
+    MoM Growth = 
+    VAR Current = [Total Worked Hours]
+    VAR Previous = [Previous Month Hours]
+    RETURN
+    DIVIDE(Current - Previous, Previous, 0)
+
+===================================================================
+SECTION 7: BUILDING DASHBOARD
+===================================================================
+
+7.1 DASHBOARD LAYOUT
+    
+    Recommended Structure:
+    
+    Header Section:
+    - Title: "ShiftGuard Employee Tracking Dashboard"
+    - Filters: Date range, Department, Shift Type
+    - Last Refresh indicator
+    
+    KPI Section:
+    - Card visuals for key metrics
+    - Total Employees, Worked Hours, Utilization
+    - Overtime, Lost Time, Alerts
+    
+    Trends Section:
+    - Line chart: Utilization over time
+    - Line chart: Worked hours by date
+    - Column chart: Overtime trends
+    
+    Analysis Section:
+    - Bar chart: Department performance
+    - Pie chart: Shift distribution
+    - Table: Employee details
+    
+    Alerts Section:
+    - Card: Low utilization count
+    - Card: Overtime alerts
+    - Table: Employees with issues
+
+7.2 CREATING KPI CARDS
+    
+    Step 1: Visualizations > Card
+    Step 2: Drag measure to Fields
+    Step 3: Format visual:
+            - Title: Enable, set text
+            - Background: Color or image
+            - Border: Add border
+            - Shadow: Enable for depth
+    Step 4: Resize and position
+    Step 5: Repeat for each KPI
+
+7.3 CREATING CHARTS
+    
+    Utilization Line Chart:
+    Step 1: Visualizations > Line Chart
+    Step 2: Axis: Date
+    Step 3: Values: Average Utilization
+    Step 4: Format:
+            - Title: "Utilization Trend"
+            - Data labels: On
+            - Line color: Custom
+            - Markers: Show
+    
+    Department Bar Chart:
+    Step 1: Visualizations > Clustered Bar
+    Step 2: Axis: Department
+    Step 3: Values: Total Worked Hours, Total Overtime
+    Step 4: Format as desired
+    
+    Shift Distribution Pie Chart:
+    Step 1: Visualizations > Pie Chart
+    Step 2: Legend: Shift Type
+    Step 3: Values: Count of Employee ID
+    Step 4: Enable data labels
+
+7.4 ADDING SLICERS
+    
+    Date Slicer:
+    Step 1: Visualizations > Slicer
+    Step 2: Field: Date
+    Step 3: Format: Relative Date
+    Step 4: Default: Last 30 Days
+    
+    Department Slicer:
+    Step 1: Visualizations > Slicer
+    Step 2: Field: Department
+    Step 3: Style: Tile or List
+    Step 4: Enable "Select All"
+    
+    Shift Type Slicer:
+    Step 1: Visualizations > Slicer
+    Step 2: Field: Shift Type
+    Step 3: Style: Buttons
+
+7.5 CREATING DETAILED TABLE
+    
+    Step 1: Visualizations > Table
+    Step 2: Add columns:
+            - Employee ID
+            - Date
+            - Department
+            - Worked Hours
+            - Utilization %
+            - Status
+    Step 3: Format:
+            - Conditional formatting on Utilization %
+            - Style: Alternating rows
+            - Enable column headers
+    Step 4: Add filters for Status
+
+===================================================================
+SECTION 8: FORMATTING AND THEMES
+===================================================================
+
+8.1 APPLYING THEME
+    
+    Step 1: View > Themes
+    Step 2: Select built-in theme or:
+    Step 3: Browse themes (JSON file)
+    Step 4: Apply to report
+    
+    Recommended Colors (ShiftGuard Theme):
+    - Primary: #4472C4 (Blue)
+    - Secondary: #70AD47 (Green)
+    - Accent: #FFC000 (Orange)
+    - Alert: #C00000 (Red)
+    - Background: #F8F9FA (Light Gray)
+
+8.2 CUSTOM FORMATTING
+    
+    For each visual:
+    - Consistent font: Segoe UI
+    - Font sizes: Title 14pt, Content 10pt
+    - Background: Light gray or white
+    - Borders: 1px solid light gray
+    - Padding: 10px
+    - Shadow: Enable for depth
+
+8.3 PAGE LAYOUT
+    
+    Step 1: View > Page Settings
+    Step 2: Type: 16:9 (standard)
+    Step 3: Background: Light color
+    Step 4: Grid: Enable for alignment
+    Step 5: Snap to grid: Enable
+
+===================================================================
+SECTION 9: DATA REFRESH
+===================================================================
+
+9.1 MANUAL REFRESH
+    
+    Step 1: Ensure Excel file closed
+    Step 2: In Power BI, click "Refresh"
+    Step 3: Data updates from Excel
+    Step 4: Visuals automatically update
+
+9.2 AUTOMATIC REFRESH (Power BI Service)
+    
+    Requirements:
+    - Power BI Pro or Premium license
+    - Excel file in accessible location
+    - Power BI Gateway installed
+    
+    Setup:
+    Step 1: Publish report to Power BI Service
+    Step 2: Configure data source credentials
+    Step 3: Schedule refresh:
+            - Dataset settings
+            - Scheduled refresh
+            - Set frequency (daily, hourly)
+            - Set time
+            - Enable
+    Step 4: Test refresh
+
+9.3 REFRESH WITH GATEWAY
+    
+    For on-premises Excel files:
+    Step 1: Install Power BI Gateway
+    Step 2: Register gateway
+    Step 3: Add data source
+    Step 4: Configure credentials
+    Step 5: Enable scheduled refresh
+
+===================================================================
+SECTION 10: PUBLISHING REPORTS
+===================================================================
+
+10.1 PUBLISH TO POWER BI SERVICE
+    
+    Step 1: Save Power BI file (.pbix)
+    Step 2: Home > Publish
+    Step 3: Sign in to Power BI
+    Step 4: Select workspace
+    Step 5: Click "Select"
+    Step 6: Wait for upload
+    Step 7: Click "Open in Power BI"
+
+10.2 SHARING REPORTS
+    
+    Step 1: In Power BI Service
+    Step 2: Open report
+    Step 3: File > Share
+    Step 4: Enter email addresses
+    Step 5: Set permissions:
+            - View only
+            - Can share
+            - Build content
+    Step 6: Optional: Add message
+    Step 7: Click "Share"
+
+10.3 CREATING APP
+    
+    Step 1: Create new workspace
+    Step 2: Add report and dataset
+    Step 3: Workspace > Create app
+    Step 4: Configure:
+            - Name: ShiftGuard Dashboard
+            - Description
+            - Logo
+            - Theme colors
+    Step 5: Add content
+    Step 6: Publish app
+    Step 7: Share app link
+
+===================================================================
+SECTION 11: MOBILE OPTIMIZATION
+===================================================================
+
+11.1 MOBILE LAYOUT
+    
+    Step 1: View > Mobile Layout
+    Step 2: Drag visuals to phone screen
+    Step 3: Resize for mobile
+    Step 4: Priority: KPIs and key charts
+    Step 5: Test on phone preview
+
+11.2 MOBILE APP
+    
+    Download Power BI Mobile:
+    - iOS: App Store
+    - Android: Google Play
+    
+    Sign in and access reports:
+    Step 1: Open Power BI app
+    Step 2: Sign in
+    Step 3: Browse to ShiftGuard report
+    Step 4: View on mobile
+
+===================================================================
+SECTION 12: SAMPLE POWER QUERY M CODE
+===================================================================
+
+For BiometricData Table:
+
+let
+    Source = Excel.Workbook(File.Contents("C:\Path\To\ShiftGuard_System.xlsm"), null, true),
+    BiometricData_Sheet = Source{[Item="BiometricData",Kind="Sheet"]}[Data],
+    #"Promoted Headers" = Table.PromoteHeaders(BiometricData_Sheet, [PromoteAllScalars=true]),
+    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
+        {"Employee ID", type text}, 
+        {"Date", type date}, 
+        {"Clock-In", type time}, 
+        {"Clock-Out", type time}, 
+        {"Tea Break (mins)", Int64.Type}, 
+        {"Lunch Break (mins)", Int64.Type}, 
+        {"Department", type text}, 
+        {"Shift Type", type text}
+    }),
+    #"Filtered Rows" = Table.SelectRows(#"Changed Type", each ([Employee ID] <> null))
+in
+    #"Filtered Rows"
+
+For Calculations Table:
+
+let
+    Source = Excel.Workbook(File.Contents("C:\Path\To\ShiftGuard_System.xlsm"), null, true),
+    Calculations_Sheet = Source{[Item="Calculations",Kind="Sheet"]}[Data],
+    #"Promoted Headers" = Table.PromoteHeaders(Calculations_Sheet, [PromoteAllScalars=true]),
+    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
+        {"Employee ID", type text}, 
+        {"Date", type date}, 
+        {"Worked Hours", type number}, 
+        {"Lost Time (hrs)", type number}, 
+        {"Overtime (hrs)", type number}, 
+        {"Night Hours", type number}, 
+        {"Utilization %", type number}, 
+        {"Status", type text}
+    }),
+    #"Filtered Rows" = Table.SelectRows(#"Changed Type", each ([Employee ID] <> null))
+in
+    #"Filtered Rows"
+
+===================================================================
+SECTION 13: TROUBLESHOOTING
+===================================================================
+
+13.1 COMMON ISSUES
+    
+    Cannot connect to Excel:
+    - Ensure Excel file is closed
+    - Check file path is correct
+    - Verify file not corrupted
+    - Try "Refresh All" in Excel first
+    
+    Data not updating:
+    - Close Excel before refresh
+    - Check data source path
+    - Verify no connection errors
+    - Try manual refresh
+    
+    Slow performance:
+    - Reduce data volume
+    - Use DirectQuery instead of Import
+    - Optimize DAX measures
+    - Remove unused columns
+
+13.2 OPTIMIZATION TIPS
+    
+    - Load only needed columns
+    - Filter data in Power Query
+    - Use measures instead of calculated columns
+    - Avoid complex relationships
+    - Minimize use of CALCULATE
+    - Use variables in DAX
+
+===================================================================
+SECTION 14: ADDITIONAL RESOURCES
+===================================================================
+
+Learning Resources:
+- Power BI Documentation: docs.microsoft.com/power-bi
+- DAX Guide: dax.guide
+- Video Tutorials: Guy in a Cube (YouTube)
+- Community: community.powerbi.com
+
+Templates and Samples:
+- Power BI Template Gallery
+- ShiftGuard sample reports (when available)
+
+Support:
+- Power BI support: support.powerbi.com
+- Excel integration help: See Troubleshooting.txt
+
+===================================================================
+END OF POWER BI INTEGRATION GUIDE
+===================================================================
