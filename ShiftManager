@@ -409,6 +409,24 @@
             background-color: var(--light-color);
             z-index: 10;
         }
+        
+        /* Roles Management Styles */
+        #rolesContainer .card {
+            border-left: 3px solid var(--primary-color);
+            transition: all 0.2s ease;
+        }
+        
+        #rolesContainer .card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        #rolesContainer .form-control-sm {
+            font-size: 0.875rem;
+        }
+        
+        #rolesContainer .input-group-text {
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body>
@@ -895,6 +913,7 @@
                                 <div class="mb-3">
                                     <label for="currency" class="form-label">Currency</label>
                                     <select class="form-select" id="currency">
+                                        <option value="ZAR">ZAR (R)</option>
                                         <option value="USD">USD ($)</option>
                                         <option value="EUR">EUR (€)</option>
                                         <option value="GBP">GBP (£)</option>
@@ -902,6 +921,18 @@
                                         <option value="AUD">AUD ($)</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6>Role Management</h6>
+                                <p class="text-muted small">Define roles with their hourly rates and expected hours</p>
+                                <div id="rolesContainer" class="mb-3">
+                                    <!-- Roles will be populated here -->
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addNewRole()">
+                                    <i class="bi bi-plus-circle"></i> Add Role
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -927,12 +958,22 @@
         let charts = {};
         let filteredEmployeeData = [];
         let filteredPayrollData = [];
+        
+        // Currency symbols mapping
+        const CURRENCY_SYMBOLS = {
+            'ZAR': 'R',
+            'USD': '$',
+            'EUR': '€',
+            'GBP': '£',
+            'CAD': '$',
+            'AUD': '$'
+        };
 
         // Default settings (can be overridden from Excel file)
         const DEFAULT_SETTINGS = {
             expectedHours: 7.5,
             hourlyRate: 25.0,
-            currency: 'USD',
+            currency: 'ZAR',
             overtimeMultiplier: 1.5,
             nightAllowance: 0.15,
             weekendAllowance: 0.20,
@@ -943,8 +984,18 @@
             paidLunchBreak: 30
         };
 
+        // Default roles
+        const DEFAULT_ROLES = [
+            { name: 'General Staff', hourlyRate: 150.0, expectedHours: 7.5 },
+            { name: 'Supervisor', hourlyRate: 200.0, expectedHours: 8.0 },
+            { name: 'Manager', hourlyRate: 300.0, expectedHours: 8.0 }
+        ];
+
         // Initialize settings with defaults
         settingsData = { ...DEFAULT_SETTINGS };
+        
+        // Roles data storage
+        let rolesData = [];
 
         /**
          * Load and parse Excel file
@@ -1932,6 +1983,7 @@
                     element.value = settingsData[key];
                 }
             });
+            renderRoles();
         }
 
         /**
@@ -1951,6 +2003,9 @@
                     settingsData[key] = value;
                 }
             });
+            
+            // Save roles to localStorage
+            saveRolesToStorage();
             
             // Recalculate data with new settings
             if (biometricData.length > 0) {
@@ -1973,19 +2028,136 @@
         }
 
         /**
+         * Load roles from localStorage
+         */
+        function loadRolesFromStorage() {
+            const stored = localStorage.getItem('shiftguard_roles');
+            if (stored) {
+                try {
+                    rolesData = JSON.parse(stored);
+                } catch (e) {
+                    console.error('Error loading roles:', e);
+                    rolesData = [...DEFAULT_ROLES];
+                }
+            } else {
+                rolesData = [...DEFAULT_ROLES];
+            }
+        }
+
+        /**
+         * Save roles to localStorage
+         */
+        function saveRolesToStorage() {
+            localStorage.setItem('shiftguard_roles', JSON.stringify(rolesData));
+        }
+
+        /**
+         * Render roles in the settings modal
+         */
+        function renderRoles() {
+            const container = document.getElementById('rolesContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Get currency symbol
+            const currencySymbol = CURRENCY_SYMBOLS[settingsData.currency || 'ZAR'] || 'R';
+            
+            rolesData.forEach((role, index) => {
+                const roleDiv = document.createElement('div');
+                roleDiv.className = 'card mb-2';
+                roleDiv.innerHTML = `
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm" 
+                                       value="${role.name}" 
+                                       onchange="updateRole(${index}, 'name', this.value)"
+                                       placeholder="Role Name">
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">${currencySymbol}</span>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" 
+                                           value="${role.hourlyRate}" 
+                                           onchange="updateRole(${index}, 'hourlyRate', parseFloat(this.value))"
+                                           placeholder="Rate/hr">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group input-group-sm">
+                                    <input type="number" step="0.1" class="form-control form-control-sm" 
+                                           value="${role.expectedHours}" 
+                                           onchange="updateRole(${index}, 'expectedHours', parseFloat(this.value))"
+                                           placeholder="Hours">
+                                    <span class="input-group-text">hrs</span>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRole(${index})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(roleDiv);
+            });
+        }
+
+        /**
+         * Add a new role
+         */
+        function addNewRole() {
+            rolesData.push({
+                name: 'New Role',
+                hourlyRate: 150.0,
+                expectedHours: 7.5
+            });
+            renderRoles();
+            saveRolesToStorage();
+        }
+
+        /**
+         * Update a role field
+         */
+        function updateRole(index, field, value) {
+            if (rolesData[index]) {
+                // Validate numeric fields
+                if ((field === 'hourlyRate' || field === 'expectedHours') && (isNaN(value) || value < 0)) {
+                    alert('Please enter a valid positive number');
+                    renderRoles(); // Re-render to reset invalid input
+                    return;
+                }
+                rolesData[index][field] = value;
+                saveRolesToStorage();
+            }
+        }
+
+        /**
+         * Remove a role
+         */
+        function removeRole(index) {
+            if (confirm('Are you sure you want to remove this role?')) {
+                rolesData.splice(index, 1);
+                renderRoles();
+                saveRolesToStorage();
+            }
+        }
+
+        /**
+         * Get role by name
+         */
+        function getRoleByName(roleName) {
+            return rolesData.find(role => role.name === roleName);
+        }
+
+        /**
          * Format currency based on settings
          */
         function formatCurrency(amount) {
-            const currency = settingsData.currency || 'USD';
-            const symbols = {
-                'USD': '$',
-                'EUR': '€',
-                'GBP': '£',
-                'CAD': '$',
-                'AUD': '$'
-            };
-            
-            const symbol = symbols[currency] || '$';
+            const currency = settingsData.currency || 'ZAR';
+            const symbol = CURRENCY_SYMBOLS[currency] || 'R';
             return `${symbol}${amount.toFixed(2)}`;
         }
 
@@ -2064,6 +2236,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Set default settings
             settingsData = { ...DEFAULT_SETTINGS };
+            
+            // Load roles from storage
+            loadRolesFromStorage();
             
             // Show dashboard by default
             showView('dashboard');
