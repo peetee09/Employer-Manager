@@ -92,7 +92,12 @@ function loadExcelFile() {
             
         } catch (error) {
             console.error('Error parsing file:', error);
-            alert('Error parsing file. Please make sure it\'s a valid Excel file with the correct format.');
+            alert('Error parsing file. Please ensure:\n' +
+                  '1. File is a valid Excel (.xlsx, .xls) or CSV file\n' +
+                  '2. Has a "BiometricData" sheet with required columns:\n' +
+                  '   - Employee ID, Date, Clock-In, Clock-Out, Tea Break, Lunch Break, Department, Shift Type\n' +
+                  '3. Dates are in YYYY-MM-DD format\n' +
+                  '4. Times are in HH:MM format');
         }
     };
     
@@ -503,7 +508,10 @@ function updatePaymentChart() {
  */
 function updateEmployeesView() {
     const tbody = document.getElementById('employeesTableBody');
-    tbody.innerHTML = '';
+    // Clear existing rows efficiently
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
     
     // Group data by employee
     const empData = {};
@@ -592,7 +600,10 @@ function updatePayrollView() {
     
     // Update table
     const tbody = document.getElementById('payrollTableBody');
-    tbody.innerHTML = '';
+    // Clear existing rows efficiently
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
     
     payrollData.forEach(row => {
         const tr = document.createElement('tr');
@@ -654,7 +665,10 @@ function updateReportsView() {
     });
     
     const deptBody = document.getElementById('departmentSummaryBody');
-    deptBody.innerHTML = '';
+    // Clear existing rows efficiently
+    while (deptBody.firstChild) {
+        deptBody.removeChild(deptBody.firstChild);
+    }
     Object.keys(deptSummary).forEach(dept => {
         const tr = document.createElement('tr');
         
@@ -708,7 +722,10 @@ function updateReportsView() {
     });
     
     const shiftBody = document.getElementById('shiftSummaryBody');
-    shiftBody.innerHTML = '';
+    // Clear existing rows efficiently
+    while (shiftBody.firstChild) {
+        shiftBody.removeChild(shiftBody.firstChild);
+    }
     Object.keys(shiftSummary).forEach(shift => {
         const avgRate = shiftSummary[shift].hours > 0 ? 
             (shiftPayroll[shift] || settingsData.hourlyRate * shiftSummary[shift].hours) / shiftSummary[shift].hours : 0;
