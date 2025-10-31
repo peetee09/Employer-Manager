@@ -393,3 +393,264 @@ End Sub
 ' ===================================================================
 ' END OF VBA CODE
 ' ===================================================================
+
+
+' ===================================================================
+' MACRO: GenerateDashboardReport
+' PURPOSE: Generate comprehensive dashboard report with all metrics
+' ===================================================================
+Sub GenerateDashboardReport()
+    Dim wsDash As Worksheet
+    Dim reportMsg As String
+    Dim utilization As Double
+    Dim compliance As Double
+    Dim totalEmp As Long
+    Dim totalHours As Double
+    Dim lowUtilCount As Long
+    Dim excessOTCount As Long
+    
+    On Error GoTo ErrorHandler
+    
+    Set wsDash = ThisWorkbook.Sheets("Dashboard")
+    
+    ' Refresh calculations first
+    Call UpdateDashboard
+    
+    ' Get key metrics
+    totalEmp = wsDash.Range("B6").Value
+    utilization = wsDash.Range("B7").Value
+    totalHours = wsDash.Range("B8").Value
+    compliance = wsDash.Range("B9").Value
+    lowUtilCount = wsDash.Range("B13").Value
+    excessOTCount = wsDash.Range("B14").Value
+    
+    ' Build report message
+    reportMsg = "╔════════════════════════════════════════╗" & vbCrLf
+    reportMsg = reportMsg & "║   SHIFTGUARD DASHBOARD REPORT         ║" & vbCrLf
+    reportMsg = reportMsg & "╚════════════════════════════════════════╝" & vbCrLf & vbCrLf
+    
+    reportMsg = reportMsg & "EXECUTIVE SUMMARY" & vbCrLf
+    reportMsg = reportMsg & "─────────────────────────────────────────" & vbCrLf
+    reportMsg = reportMsg & "Total Employees:        " & totalEmp & vbCrLf
+    reportMsg = reportMsg & "Average Utilization:    " & Format(utilization, "0.0") & "%" & vbCrLf
+    reportMsg = reportMsg & "Total Hours Worked:     " & Format(totalHours, "0.0") & vbCrLf
+    reportMsg = reportMsg & "Compliance Score:       " & Format(compliance, "0.0") & "%" & vbCrLf & vbCrLf
+    
+    reportMsg = reportMsg & "ALERTS" & vbCrLf
+    reportMsg = reportMsg & "─────────────────────────────────────────" & vbCrLf
+    reportMsg = reportMsg & "Low Utilization:        " & lowUtilCount
+    If lowUtilCount > 5 Then
+        reportMsg = reportMsg & " ⚠ HIGH"
+    Else
+        reportMsg = reportMsg & " ✓ OK"
+    End If
+    reportMsg = reportMsg & vbCrLf
+    
+    reportMsg = reportMsg & "Excessive Overtime:     " & excessOTCount
+    If excessOTCount > 10 Then
+        reportMsg = reportMsg & " ⚠ HIGH"
+    Else
+        reportMsg = reportMsg & " ✓ OK"
+    End If
+    reportMsg = reportMsg & vbCrLf & vbCrLf
+    
+    reportMsg = reportMsg & "STATUS: "
+    If utilization >= 95 And compliance >= 90 Then
+        reportMsg = reportMsg & "✓ EXCELLENT"
+    ElseIf utilization >= 85 And compliance >= 80 Then
+        reportMsg = reportMsg & "⚠ GOOD - NEEDS ATTENTION"
+    Else
+        reportMsg = reportMsg & "⚠ ACTION REQUIRED"
+    End If
+    
+    reportMsg = reportMsg & vbCrLf & vbCrLf & "Report Generated: " & Format(Now, "YYYY-MM-DD HH:NN:SS")
+    
+    ' Display report
+    MsgBox reportMsg, vbInformation, "Dashboard Report"
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error generating report: " & Err.Description, vbCritical, "Report Error"
+End Sub
+
+' ===================================================================
+' MACRO: ExportDashboardToHTML
+' PURPOSE: Export dashboard to HTML format for sharing
+' ===================================================================
+Sub ExportDashboardToHTML()
+    Dim wsDash As Worksheet
+    Dim filePath As String
+    Dim fileNum As Integer
+    Dim html As String
+    
+    On Error GoTo ErrorHandler
+    
+    Set wsDash = ThisWorkbook.Sheets("Dashboard")
+    
+    ' Get save location
+    filePath = Application.GetSaveAsFilename( _
+        InitialFileName:="ShiftGuard_Dashboard_" & Format(Now, "YYYYMMDD") & ".html", _
+        FileFilter:="HTML Files (*.html), *.html", _
+        Title:="Export Dashboard to HTML")
+    
+    If filePath = "False" Then
+        MsgBox "Export cancelled.", vbInformation
+        Exit Sub
+    End If
+    
+    ' Build HTML
+    html = "<!DOCTYPE html>" & vbCrLf
+    html = html & "<html><head><title>ShiftGuard Dashboard</title>" & vbCrLf
+    html = html & "<style>" & vbCrLf
+    html = html & "body { font-family: Calibri, Arial, sans-serif; margin: 20px; }" & vbCrLf
+    html = html & "h1 { color: #1F4E78; }" & vbCrLf
+    html = html & "table { border-collapse: collapse; margin: 20px 0; }" & vbCrLf
+    html = html & "th { background-color: #4472C4; color: white; padding: 10px; }" & vbCrLf
+    html = html & "td { border: 1px solid #ddd; padding: 8px; }" & vbCrLf
+    html = html & ".good { background-color: #C6EFCE; }" & vbCrLf
+    html = html & ".warning { background-color: #FFEB9C; }" & vbCrLf
+    html = html & ".alert { background-color: #FFC7CE; }" & vbCrLf
+    html = html & "</style></head><body>" & vbCrLf
+    html = html & "<h1>ShiftGuard Corporate Dashboard</h1>" & vbCrLf
+    html = html & "<p>Report Generated: " & Format(Now, "YYYY-MM-DD HH:NN:SS") & "</p>" & vbCrLf
+    
+    ' Add key metrics
+    html = html & "<h2>Executive Summary</h2>" & vbCrLf
+    html = html & "<table>" & vbCrLf
+    html = html & "<tr><th>Metric</th><th>Value</th></tr>" & vbCrLf
+    html = html & "<tr><td>Total Employees</td><td>" & wsDash.Range("B6").Value & "</td></tr>" & vbCrLf
+    html = html & "<tr><td>Average Utilization</td><td>" & Format(wsDash.Range("B7").Value, "0.0") & "%</td></tr>" & vbCrLf
+    html = html & "<tr><td>Total Hours</td><td>" & Format(wsDash.Range("B8").Value, "0.0") & "</td></tr>" & vbCrLf
+    html = html & "<tr><td>Compliance Score</td><td>" & Format(wsDash.Range("B9").Value, "0.0") & "%</td></tr>" & vbCrLf
+    html = html & "</table>" & vbCrLf
+    
+    html = html & "</body></html>"
+    
+    ' Write to file
+    fileNum = FreeFile
+    Open filePath For Output As #fileNum
+    Print #fileNum, html
+    Close #fileNum
+    
+    MsgBox "Dashboard exported successfully to:" & vbCrLf & filePath, vbInformation, "Export Complete"
+    
+    Exit Sub
+    
+ErrorHandler:
+    Close #fileNum
+    MsgBox "Error exporting dashboard: " & Err.Description, vbCritical, "Export Error"
+End Sub
+
+' ===================================================================
+' MACRO: AnalyzeWellness
+' PURPOSE: Analyze employee wellness metrics
+' ===================================================================
+Sub AnalyzeWellness()
+    Dim wsCalc As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim avgBreakTime As Double
+    Dim breakCompliant As Long
+    Dim breakNonCompliant As Long
+    Dim avgWorkHours As Double
+    Dim highWorkloadCount As Long
+    Dim reportMsg As String
+    
+    On Error GoTo ErrorHandler
+    
+    Set wsCalc = ThisWorkbook.Sheets("Calculations")
+    lastRow = wsCalc.Cells(wsCalc.Rows.Count, 1).End(xlUp).Row
+    
+    ' Initialize counters
+    avgBreakTime = 0
+    breakCompliant = 0
+    breakNonCompliant = 0
+    avgWorkHours = 0
+    highWorkloadCount = 0
+    
+    ' Analyze data
+    For i = 2 To lastRow
+        If wsCalc.Cells(i, 1).Value <> "" Then
+            ' Break compliance
+            If wsCalc.Cells(i, 9).Value = "Compliant" Then
+                breakCompliant = breakCompliant + 1
+            ElseIf wsCalc.Cells(i, 9).Value = "Non-Compliant" Then
+                breakNonCompliant = breakNonCompliant + 1
+            End If
+            
+            ' Work hours
+            If IsNumeric(wsCalc.Cells(i, 3).Value) Then
+                avgWorkHours = avgWorkHours + wsCalc.Cells(i, 3).Value
+                If wsCalc.Cells(i, 3).Value > 9 Then
+                    highWorkloadCount = highWorkloadCount + 1
+                End If
+            End If
+            
+            ' Break time
+            If IsNumeric(wsCalc.Cells(i, 10).Value) Then
+                avgBreakTime = avgBreakTime + wsCalc.Cells(i, 10).Value
+            End If
+        End If
+    Next i
+    
+    ' Calculate averages
+    If lastRow > 2 Then
+        avgBreakTime = avgBreakTime / (lastRow - 1)
+        avgWorkHours = avgWorkHours / (lastRow - 1)
+    End If
+    
+    ' Build report
+    reportMsg = "╔════════════════════════════════════════╗" & vbCrLf
+    reportMsg = reportMsg & "║   EMPLOYEE WELLNESS ANALYSIS          ║" & vbCrLf
+    reportMsg = reportMsg & "╚════════════════════════════════════════╝" & vbCrLf & vbCrLf
+    
+    reportMsg = reportMsg & "BREAK TIME ANALYSIS" & vbCrLf
+    reportMsg = reportMsg & "─────────────────────────────────────────" & vbCrLf
+    reportMsg = reportMsg & "Average Break Time:     " & Format(avgBreakTime, "0.0") & " mins" & vbCrLf
+    reportMsg = reportMsg & "Compliant:              " & breakCompliant & vbCrLf
+    reportMsg = reportMsg & "Non-Compliant:          " & breakNonCompliant
+    If breakNonCompliant > breakCompliant * 0.1 Then
+        reportMsg = reportMsg & " ⚠ HIGH"
+    Else
+        reportMsg = reportMsg & " ✓ OK"
+    End If
+    reportMsg = reportMsg & vbCrLf & vbCrLf
+    
+    reportMsg = reportMsg & "WORKLOAD ANALYSIS" & vbCrLf
+    reportMsg = reportMsg & "─────────────────────────────────────────" & vbCrLf
+    reportMsg = reportMsg & "Average Work Hours:     " & Format(avgWorkHours, "0.0") & " hrs/day" & vbCrLf
+    reportMsg = reportMsg & "High Workload Cases:    " & highWorkloadCount
+    If highWorkloadCount > (lastRow - 1) * 0.2 Then
+        reportMsg = reportMsg & " ⚠ CONCERNING"
+    Else
+        reportMsg = reportMsg & " ✓ ACCEPTABLE"
+    End If
+    reportMsg = reportMsg & vbCrLf & vbCrLf
+    
+    reportMsg = reportMsg & "RECOMMENDATIONS" & vbCrLf
+    reportMsg = reportMsg & "─────────────────────────────────────────" & vbCrLf
+    If breakNonCompliant > breakCompliant * 0.1 Then
+        reportMsg = reportMsg & "• Review break time policies" & vbCrLf
+    End If
+    If highWorkloadCount > (lastRow - 1) * 0.2 Then
+        reportMsg = reportMsg & "• Monitor employees with high workload" & vbCrLf
+    End If
+    If avgWorkHours > 8 Then
+        reportMsg = reportMsg & "• Consider workload redistribution" & vbCrLf
+    End If
+    
+    reportMsg = reportMsg & vbCrLf & "Analysis Date: " & Format(Now, "YYYY-MM-DD HH:NN:SS")
+    
+    ' Display report
+    MsgBox reportMsg, vbInformation, "Wellness Analysis"
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error analyzing wellness: " & Err.Description, vbCritical, "Analysis Error"
+End Sub
+
+' ===================================================================
+' END OF SHIFTGUARD VBA MACROS
+' ===================================================================
