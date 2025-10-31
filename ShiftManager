@@ -958,6 +958,16 @@
         let charts = {};
         let filteredEmployeeData = [];
         let filteredPayrollData = [];
+        
+        // Currency symbols mapping
+        const CURRENCY_SYMBOLS = {
+            'ZAR': 'R',
+            'USD': '$',
+            'EUR': '€',
+            'GBP': '£',
+            'CAD': '$',
+            'AUD': '$'
+        };
 
         // Default settings (can be overridden from Excel file)
         const DEFAULT_SETTINGS = {
@@ -2051,15 +2061,7 @@
             container.innerHTML = '';
             
             // Get currency symbol
-            const currencySymbols = {
-                'ZAR': 'R',
-                'USD': '$',
-                'EUR': '€',
-                'GBP': '£',
-                'CAD': '$',
-                'AUD': '$'
-            };
-            const currencySymbol = currencySymbols[settingsData.currency || 'ZAR'] || 'R';
+            const currencySymbol = CURRENCY_SYMBOLS[settingsData.currency || 'ZAR'] || 'R';
             
             rolesData.forEach((role, index) => {
                 const roleDiv = document.createElement('div');
@@ -2121,6 +2123,12 @@
          */
         function updateRole(index, field, value) {
             if (rolesData[index]) {
+                // Validate numeric fields
+                if ((field === 'hourlyRate' || field === 'expectedHours') && (isNaN(value) || value < 0)) {
+                    alert('Please enter a valid positive number');
+                    renderRoles(); // Re-render to reset invalid input
+                    return;
+                }
                 rolesData[index][field] = value;
                 saveRolesToStorage();
             }
@@ -2149,16 +2157,7 @@
          */
         function formatCurrency(amount) {
             const currency = settingsData.currency || 'ZAR';
-            const symbols = {
-                'ZAR': 'R',
-                'USD': '$',
-                'EUR': '€',
-                'GBP': '£',
-                'CAD': '$',
-                'AUD': '$'
-            };
-            
-            const symbol = symbols[currency] || 'R';
+            const symbol = CURRENCY_SYMBOLS[currency] || 'R';
             return `${symbol}${amount.toFixed(2)}`;
         }
 
