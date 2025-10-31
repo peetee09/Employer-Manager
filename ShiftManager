@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShiftGuard - Employee Management Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- SheetJS for Excel parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        /* ShiftGuard Dashboard Styles */
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #0dcaf0;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+
+        /* KPI Card Styles */
+        .kpi-card {
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .kpi-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .kpi-icon.bg-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .kpi-icon.bg-success {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .kpi-icon.bg-warning {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .kpi-icon.bg-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+        }
+
+        /* Table Styles */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: var(--light-color);
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: var(--dark-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        /* Metric List Styles */
+        .metric-list {
+            padding: 0;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-item span {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .metric-item strong {
+            color: var(--dark-color);
+            font-size: 1.1rem;
+        }
+
+        /* Chart Container */
+        canvas {
+            max-height: 300px;
+        }
+
+        /* Upload Section */
+        #uploadSection .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #uploadSection .card-title,
+        #uploadSection .text-muted {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        #uploadSection .form-control {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        #uploadSection .form-control:focus {
+            border-color: white;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        #uploadSection .form-control::file-selector-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            margin-right: 10px;
+            border-radius: 6px;
+        }
+
+        #uploadSection .btn-primary {
+            background-color: white;
+            color: #667eea;
+            border: none;
+            font-weight: 600;
+        }
+
+        #uploadSection .btn-primary:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+
+        /* View Sections */
+        .view-section {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Button Group */
+        .btn-group .btn {
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-group .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .kpi-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .kpi-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .table {
+                font-size: 0.85rem;
+            }
+
+            canvas {
+                max-height: 250px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+            }
+
+            .kpi-card {
+                margin-bottom: 15px;
+            }
+
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        /* Alert Styles */
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        /* Utility Classes */
+        .shadow-sm {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .rounded-lg {
+            border-radius: 12px !important;
+        }
+
+        /* Custom Scrollbar */
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Print Styles */
+        @media print {
+            .navbar,
+            #uploadSection,
+            .btn-group {
+                display: none !important;
+            }
+
+            .card {
+                break-inside: avoid;
+                box-shadow: none !important;
+                border: 1px solid #dee2e6 !important;
+            }
+
+            body {
+                background-color: white;
+            }
+        }
+        
+        /* Settings Modal Styles */
+        .settings-modal .modal-content {
+            border-radius: 12px;
+        }
+        
+        .settings-modal .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .settings-modal .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+        
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-low-utilization {
+            background-color: var(--danger-color);
+        }
+        
+        .status-excessive-overtime {
+            background-color: var(--warning-color);
+        }
+        
+        .status-perfect {
+            background-color: var(--success-color);
+        }
+        
+        .status-good {
+            background-color: var(--info-color);
+        }
+        
+        /* Filter Section */
+        .filter-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        /* Data Table Enhancements */
+        .data-table th {
+            position: sticky;
+            top: 0;
+            background-color: var(--light-color);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-shield-check"></i> ShiftGuard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showView('dashboard', event)">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('employees', event)">
+                            <i class="bi bi-people"></i> Employees
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('payroll', event)">
+                            <i class="bi bi-cash-stack"></i> Payroll
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showView('reports', event)">
+                            <i class="bi bi-file-earmark-text"></i> Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSettingsModal()">
+                            <i class="bi bi-gear"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <!-- File Upload Section -->
+        <div class="row mb-4" id="uploadSection">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-upload"></i> Upload Data
+                        </h5>
+                        <p class="text-muted">Upload your ShiftGuard Excel file to view the dashboard</p>
+                        <div class="input-group mb-3">
+                            <input type="file" class="form-control" id="excelFile" accept=".xlsx,.xls,.csv">
+                            <button class="btn btn-primary" type="button" onclick="loadExcelFile()">
+                                <i class="bi bi-file-earmark-spreadsheet"></i> Load Data
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            Supported formats: .xlsx, .xls, .csv | 
+                            <a href="#" class="text-white" onclick="downloadSampleFile()">Download Sample File</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="view-section" style="display: none;">
+            <!-- KPI Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm kpi-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Total Employees</h6>
+                                    <h3 class="mb-0" id="totalEmployees">0</h3>
+                                </div>
+                                <div class="kpi-icon bg-primary">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm kpi-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Total Hours</h6>
+                                    <h3 class="mb-0" id="totalHours">0</h3>
+                                </div>
+                                <div class="kpi-icon bg-success">
+                                    <i class="bi bi-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm kpi-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Total Gross Pay</h6>
+                                    <h3 class="mb-0" id="totalGrossPay">$0</h3>
+                                </div>
+                                <div class="kpi-icon bg-warning">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm kpi-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Avg Utilization</h6>
+                                    <h3 class="mb-0" id="avgUtilization">0%</h3>
+                                </div>
+                                <div class="kpi-icon bg-info">
+                                    <i class="bi bi-graph-up"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Department Performance</h5>
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Shift Distribution</h5>
+                            <canvas id="shiftChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Metrics Row -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Overtime Analysis</h5>
+                            <canvas id="overtimeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Payment Breakdown</h5>
+                            <canvas id="paymentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Utilization Metrics</h5>
+                            <div class="metric-list">
+                                <div class="metric-item">
+                                    <span>Total Overtime:</span>
+                                    <strong id="totalOvertime">0 hrs</strong>
+                                </div>
+                                <div class="metric-item">
+                                    <span>Total Lost Time:</span>
+                                    <strong id="totalLostTime">0 hrs</strong>
+                                </div>
+                                <div class="metric-item">
+                                    <span>Night Shift Hours:</span>
+                                    <strong id="nightShiftHours">0 hrs</strong>
+                                </div>
+                                <div class="metric-item">
+                                    <span>Total Net Pay:</span>
+                                    <strong id="totalNetPay">$0</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employees View -->
+        <div id="employeesView" class="view-section" style="display: none;">
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="employeeDepartmentFilter" class="form-label">Department</label>
+                        <select class="form-select" id="employeeDepartmentFilter" onchange="filterEmployeeTable()">
+                            <option value="">All Departments</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="employeeStatusFilter" class="form-label">Status</label>
+                        <select class="form-select" id="employeeStatusFilter" onchange="filterEmployeeTable()">
+                            <option value="">All Statuses</option>
+                            <option value="Low Utilization">Low Utilization</option>
+                            <option value="Excessive Overtime">Excessive Overtime</option>
+                            <option value="Perfect">Perfect</option>
+                            <option value="Good">Good</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="employeeSearch" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="employeeSearch" placeholder="Search employees..." onkeyup="filterEmployeeTable()">
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Employee Details</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover data-table" id="employeesTable">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Department</th>
+                                    <th>Total Hours</th>
+                                    <th>Overtime</th>
+                                    <th>Utilization</th>
+                                    <th>Status</th>
+                                    <th>Gross Pay</th>
+                                    <th>Net Pay</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeesTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payroll View -->
+        <div id="payrollView" class="view-section" style="display: none;">
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="payrollDepartmentFilter" class="form-label">Department</label>
+                        <select class="form-select" id="payrollDepartmentFilter" onchange="filterPayrollTable()">
+                            <option value="">All Departments</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="payrollDateFilter" class="form-label">Date Range</label>
+                        <input type="date" class="form-control" id="payrollDateFilter" onchange="filterPayrollTable()">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="payrollEmployeeFilter" class="form-label">Employee</label>
+                        <input type="text" class="form-control" id="payrollEmployeeFilter" placeholder="Employee ID" onkeyup="filterPayrollTable()">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="payrollAmountFilter" class="form-label">Min Net Pay</label>
+                        <input type="number" class="form-control" id="payrollAmountFilter" placeholder="Min amount" onchange="filterPayrollTable()">
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Total Payroll Cost</h6>
+                            <h3 id="payrollTotalGross">$0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Total Deductions</h6>
+                            <h3 id="payrollTotalDeductions">$0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Total Net Pay</h6>
+                            <h3 id="payrollTotalNet">$0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Avg Cost/Hour</h6>
+                            <h3 id="payrollAvgRate">$0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Payroll Details</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover data-table" id="payrollTable">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Date</th>
+                                    <th>Regular Hours</th>
+                                    <th>OT Hours</th>
+                                    <th>Base Pay</th>
+                                    <th>OT Pay</th>
+                                    <th>Allowances</th>
+                                    <th>Gross Pay</th>
+                                    <th>Deductions</th>
+                                    <th>Net Pay</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payrollTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports View -->
+        <div id="reportsView" class="view-section" style="display: none;">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Department Summary</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm" id="departmentSummaryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Department</th>
+                                            <th>Employees</th>
+                                            <th>Total Hours</th>
+                                            <th>Total Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="departmentSummaryBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Shift Summary</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm" id="shiftSummaryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Shift Type</th>
+                                            <th>Total Hours</th>
+                                            <th>Employees</th>
+                                            <th>Avg Rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="shiftSummaryBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Export Options</h5>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary" onclick="exportToCSV('employees')">
+                            <i class="bi bi-download"></i> Export Employees
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="exportToCSV('payroll')">
+                            <i class="bi bi-download"></i> Export Payroll
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="exportToCSV('summary')">
+                            <i class="bi bi-download"></i> Export Summary
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="exportToPDF()">
+                            <i class="bi bi-file-pdf"></i> Export PDF Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade settings-modal" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">
+                        <i class="bi bi-gear"></i> Application Settings
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="settingsForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Work Hours & Rates</h6>
+                                <div class="mb-3">
+                                    <label for="expectedHours" class="form-label">Expected Daily Hours</label>
+                                    <input type="number" step="0.1" class="form-control" id="expectedHours" value="7.5">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hourlyRate" class="form-label">Hourly Rate ($)</label>
+                                    <input type="number" step="0.01" class="form-control" id="hourlyRate" value="25.00">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="overtimeMultiplier" class="form-label">Overtime Multiplier</label>
+                                    <input type="number" step="0.1" class="form-control" id="overtimeMultiplier" value="1.5">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Allowances & Deductions</h6>
+                                <div class="mb-3">
+                                    <label for="nightAllowance" class="form-label">Night Allowance (%)</label>
+                                    <input type="number" step="0.01" class="form-control" id="nightAllowance" value="0.15">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="weekendAllowance" class="form-label">Weekend Allowance (%)</label>
+                                    <input type="number" step="0.01" class="form-control" id="weekendAllowance" value="0.20">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="taxRate" class="form-label">Tax Rate (%)</label>
+                                    <input type="number" step="0.01" class="form-control" id="taxRate" value="0.15">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="healthInsurance" class="form-label">Health Insurance ($)</label>
+                                    <input type="number" step="0.01" class="form-control" id="healthInsurance" value="50.00">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="pensionRate" class="form-label">Pension Rate (%)</label>
+                                    <input type="number" step="0.01" class="form-control" id="pensionRate" value="0.05">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Break Settings</h6>
+                                <div class="mb-3">
+                                    <label for="paidTeaBreak" class="form-label">Paid Tea Break (minutes)</label>
+                                    <input type="number" class="form-control" id="paidTeaBreak" value="30">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="paidLunchBreak" class="form-label">Paid Lunch Break (minutes)</label>
+                                    <input type="number" class="form-control" id="paidLunchBreak" value="30">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>General Settings</h6>
+                                <div class="mb-3">
+                                    <label for="currency" class="form-label">Currency</label>
+                                    <select class="form-select" id="currency">
+                                        <option value="USD">USD ($)</option>
+                                        <option value="EUR">EUR (€)</option>
+                                        <option value="GBP">GBP (£)</option>
+                                        <option value="CAD">CAD ($)</option>
+                                        <option value="AUD">AUD ($)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ShiftGuard Dashboard Application
+        // Global data storage
+        let biometricData = [];
+        let settingsData = {};
+        let calculationsData = [];
+        let payrollData = [];
+        let charts = {};
+        let filteredEmployeeData = [];
+        let filteredPayrollData = [];
+
+        // Default settings (can be overridden from Excel file)
+        const DEFAULT_SETTINGS = {
+            expectedHours: 7.5,
+            hourlyRate: 25.0,
+            currency: 'USD',
+            overtimeMultiplier: 1.5,
+            nightAllowance: 0.15,
+            weekendAllowance: 0.20,
+            taxRate: 0.15,
+            healthInsurance: 50.0,
+            pensionRate: 0.05,
+            paidTeaBreak: 30,
+            paidLunchBreak: 30
+        };
+
+        // Initialize settings with defaults
+        settingsData = { ...DEFAULT_SETTINGS };
+
+        /**
+         * Load and parse Excel file
+         */
+        function loadExcelFile() {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            showLoading(true);
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Parse BiometricData sheet
+                    if (workbook.SheetNames.includes('BiometricData')) {
+                        const sheet = workbook.Sheets['BiometricData'];
+                        biometricData = XLSX.utils.sheet_to_json(sheet);
+                    }
+                    
+                    // Parse Settings sheet if available
+                    if (workbook.SheetNames.includes('Settings')) {
+                        parseSettings(workbook.Sheets['Settings']);
+                    }
+                    
+                    // Parse Calculations sheet if available
+                    if (workbook.SheetNames.includes('Calculations')) {
+                        const sheet = workbook.Sheets['Calculations'];
+                        calculationsData = XLSX.utils.sheet_to_json(sheet);
+                    }
+                    
+                    // Parse Payroll sheet if available
+                    if (workbook.SheetNames.includes('Payroll')) {
+                        const sheet = workbook.Sheets['Payroll'];
+                        payrollData = XLSX.utils.sheet_to_json(sheet);
+                    }
+                    
+                    // If no pre-calculated data, calculate from biometric data
+                    if (biometricData.length > 0) {
+                        if (calculationsData.length === 0) {
+                            calculationsData = calculateFromBiometric(biometricData);
+                        }
+                        if (payrollData.length === 0) {
+                            payrollData = calculatePayroll(calculationsData);
+                        }
+                        
+                        // Update all views
+                        updateDashboard();
+                        updateEmployeesView();
+                        updatePayrollView();
+                        updateReportsView();
+                        
+                        // Show dashboard
+                        showView('dashboard');
+                        
+                        // Show success message
+                        showSuccessMessage(`Successfully loaded ${biometricData.length} records!`);
+                    } else {
+                        alert('No data found in the BiometricData sheet!');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error parsing file:', error);
+                    alert('Error parsing file. Please ensure:\n' +
+                          '1. File is a valid Excel (.xlsx) or CSV file\n' +
+                          '2. Contains a "BiometricData" sheet with appropriate columns\n' +
+                          '3. File is not corrupted');
+                } finally {
+                    showLoading(false);
+                }
+            };
+            
+            reader.onerror = function() {
+                alert('Error reading file. Please try again.');
+                showLoading(false);
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        /**
+         * Parse settings from Excel sheet
+         */
+        function parseSettings(sheet) {
+            const settingsArray = XLSX.utils.sheet_to_json(sheet);
+            
+            settingsArray.forEach(row => {
+                if (row.Setting && row.Value !== undefined) {
+                    // Convert to appropriate type
+                    let value = row.Value;
+                    if (!isNaN(value) && value !== '') {
+                        value = Number(value);
+                    }
+                    settingsData[row.Setting] = value;
+                }
+            });
+            
+            // Update settings form with loaded values
+            updateSettingsForm();
+        }
+
+        /**
+         * Calculate data from biometric records
+         */
+        function calculateFromBiometric(data) {
+            const calculations = [];
+            const employeeMap = new Map();
+            
+            // Process each biometric record
+            data.forEach(record => {
+                const employeeId = record.EmployeeID || record.Employee || record.ID;
+                if (!employeeId) return;
+                
+                if (!employeeMap.has(employeeId)) {
+                    employeeMap.set(employeeId, {
+                        employeeId: employeeId,
+                        department: record.Department || 'Unknown',
+                        totalHours: 0,
+                        overtime: 0,
+                        lostTime: 0,
+                        nightHours: 0,
+                        weekendHours: 0,
+                        regularHours: 0,
+                        shifts: 0
+                    });
+                }
+                
+                const employee = employeeMap.get(employeeId);
+                
+                // Calculate hours (simplified - in a real app, this would be more complex)
+                const hours = record.Hours || record.TotalHours || 8;
+                employee.totalHours += hours;
+                employee.shifts++;
+                
+                // Determine shift type and calculate overtime
+                const shiftType = record.ShiftType || record.Shift || 'Day';
+                const expectedHours = settingsData.expectedHours || DEFAULT_SETTINGS.expectedHours;
+                
+                if (hours > expectedHours) {
+                    employee.overtime += (hours - expectedHours);
+                    employee.regularHours += expectedHours;
+                } else {
+                    employee.regularHours += hours;
+                    employee.lostTime += (expectedHours - hours);
+                }
+                
+                // Track night and weekend hours
+                if (shiftType.toLowerCase().includes('night')) {
+                    employee.nightHours += hours;
+                }
+                
+                // Check if it's a weekend (simplified)
+                const date = record.Date ? new Date(record.Date) : new Date();
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    employee.weekendHours += hours;
+                }
+            });
+            
+            // Convert map to array and calculate utilization
+            employeeMap.forEach(employee => {
+                const expectedTotalHours = employee.shifts * (settingsData.expectedHours || DEFAULT_SETTINGS.expectedHours);
+                employee.utilization = expectedTotalHours > 0 ? 
+                    (employee.totalHours / expectedTotalHours) * 100 : 0;
+                
+                // Determine status
+                if (employee.utilization < 70) {
+                    employee.status = 'Low Utilization';
+                } else if (employee.overtime > 10) {
+                    employee.status = 'Excessive Overtime';
+                } else if (employee.utilization >= 95 && employee.overtime <= 5) {
+                    employee.status = 'Perfect';
+                } else {
+                    employee.status = 'Good';
+                }
+                
+                calculations.push(employee);
+            });
+            
+            return calculations;
+        }
+
+        /**
+         * Calculate payroll data
+         */
+        function calculatePayroll(calculations) {
+            const payroll = [];
+            const hourlyRate = settingsData.hourlyRate || DEFAULT_SETTINGS.hourlyRate;
+            const overtimeMultiplier = settingsData.overtimeMultiplier || DEFAULT_SETTINGS.overtimeMultiplier;
+            const nightAllowance = settingsData.nightAllowance || DEFAULT_SETTINGS.nightAllowance;
+            const weekendAllowance = settingsData.weekendAllowance || DEFAULT_SETTINGS.weekendAllowance;
+            const taxRate = settingsData.taxRate || DEFAULT_SETTINGS.taxRate;
+            const healthInsurance = settingsData.healthInsurance || DEFAULT_SETTINGS.healthInsurance;
+            const pensionRate = settingsData.pensionRate || DEFAULT_SETTINGS.pensionRate;
+            
+            calculations.forEach(employee => {
+                // Calculate base pay
+                const basePay = employee.regularHours * hourlyRate;
+                
+                // Calculate overtime pay
+                const overtimePay = employee.overtime * hourlyRate * overtimeMultiplier;
+                
+                // Calculate allowances
+                const nightAllowanceAmount = employee.nightHours * hourlyRate * nightAllowance;
+                const weekendAllowanceAmount = employee.weekendHours * hourlyRate * weekendAllowance;
+                const allowances = nightAllowanceAmount + weekendAllowanceAmount;
+                
+                // Calculate gross pay
+                const grossPay = basePay + overtimePay + allowances;
+                
+                // Calculate deductions
+                const tax = grossPay * taxRate;
+                const pension = grossPay * pensionRate;
+                const deductions = tax + pension + healthInsurance;
+                
+                // Calculate net pay
+                const netPay = grossPay - deductions;
+                
+                payroll.push({
+                    employeeId: employee.employeeId,
+                    department: employee.department,
+                    date: new Date().toISOString().split('T')[0], // Today's date
+                    regularHours: employee.regularHours,
+                    overtimeHours: employee.overtime,
+                    basePay: basePay,
+                    overtimePay: overtimePay,
+                    allowances: allowances,
+                    grossPay: grossPay,
+                    deductions: deductions,
+                    netPay: netPay
+                });
+            });
+            
+            return payroll;
+        }
+
+        /**
+         * Update the dashboard with current data
+         */
+        function updateDashboard() {
+            // Update KPI cards
+            document.getElementById('totalEmployees').textContent = calculationsData.length;
+            
+            const totalHours = calculationsData.reduce((sum, emp) => sum + emp.totalHours, 0);
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+            
+            const totalGrossPay = payrollData.reduce((sum, p) => sum + p.grossPay, 0);
+            document.getElementById('totalGrossPay').textContent = formatCurrency(totalGrossPay);
+            
+            const avgUtilization = calculationsData.reduce((sum, emp) => sum + emp.utilization, 0) / calculationsData.length;
+            document.getElementById('avgUtilization').textContent = avgUtilization.toFixed(1) + '%';
+            
+            // Update additional metrics
+            const totalOvertime = calculationsData.reduce((sum, emp) => sum + emp.overtime, 0);
+            document.getElementById('totalOvertime').textContent = totalOvertime.toFixed(1) + ' hrs';
+            
+            const totalLostTime = calculationsData.reduce((sum, emp) => sum + emp.lostTime, 0);
+            document.getElementById('totalLostTime').textContent = totalLostTime.toFixed(1) + ' hrs';
+            
+            const nightShiftHours = calculationsData.reduce((sum, emp) => sum + emp.nightHours, 0);
+            document.getElementById('nightShiftHours').textContent = nightShiftHours.toFixed(1) + ' hrs';
+            
+            const totalNetPay = payrollData.reduce((sum, p) => sum + p.netPay, 0);
+            document.getElementById('totalNetPay').textContent = formatCurrency(totalNetPay);
+            
+            // Create charts
+            createDepartmentChart();
+            createShiftChart();
+            createOvertimeChart();
+            createPaymentChart();
+        }
+
+        /**
+         * Create department performance chart
+         */
+        function createDepartmentChart() {
+            const ctx = document.getElementById('departmentChart').getContext('2d');
+            
+            // Group data by department
+            const deptData = {};
+            calculationsData.forEach(emp => {
+                if (!deptData[emp.department]) {
+                    deptData[emp.department] = {
+                        employees: 0,
+                        totalHours: 0,
+                        totalOvertime: 0,
+                        avgUtilization: 0
+                    };
+                }
+                
+                deptData[emp.department].employees++;
+                deptData[emp.department].totalHours += emp.totalHours;
+                deptData[emp.department].totalOvertime += emp.overtime;
+                deptData[emp.department].avgUtilization += emp.utilization;
+            });
+            
+            // Calculate averages
+            Object.keys(deptData).forEach(dept => {
+                deptData[dept].avgUtilization /= deptData[dept].employees;
+            });
+            
+            const departments = Object.keys(deptData);
+            const utilizations = departments.map(dept => deptData[dept].avgUtilization);
+            
+            // Destroy existing chart if it exists
+            if (charts.departmentChart) {
+                charts.departmentChart.destroy();
+            }
+            
+            // Create new chart
+            charts.departmentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: departments,
+                    datasets: [{
+                        label: 'Utilization Rate (%)',
+                        data: utilizations,
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.7)',
+                            'rgba(240, 147, 251, 0.7)',
+                            'rgba(255, 236, 210, 0.7)',
+                            'rgba(79, 172, 254, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(240, 147, 251, 1)',
+                            'rgba(255, 236, 210, 1)',
+                            'rgba(79, 172, 254, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Department Utilization'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Utilization (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Create shift distribution chart
+         */
+        function createShiftChart() {
+            const ctx = document.getElementById('shiftChart').getContext('2d');
+            
+            // Calculate shift distribution (simplified)
+            const dayHours = calculationsData.reduce((sum, emp) => sum + (emp.totalHours - emp.nightHours), 0);
+            const nightHours = calculationsData.reduce((sum, emp) => sum + emp.nightHours, 0);
+            const weekendHours = calculationsData.reduce((sum, emp) => sum + emp.weekendHours, 0);
+            
+            // Destroy existing chart if it exists
+            if (charts.shiftChart) {
+                charts.shiftChart.destroy();
+            }
+            
+            // Create new chart
+            charts.shiftChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Day Shifts', 'Night Shifts', 'Weekend Shifts'],
+                    datasets: [{
+                        data: [dayHours, nightHours, weekendHours],
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.7)',
+                            'rgba(240, 147, 251, 0.7)',
+                            'rgba(255, 236, 210, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(240, 147, 251, 1)',
+                            'rgba(255, 236, 210, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Create overtime analysis chart
+         */
+        function createOvertimeChart() {
+            const ctx = document.getElementById('overtimeChart').getContext('2d');
+            
+            // Group employees by overtime hours
+            const overtimeRanges = {
+                '0-5': 0,
+                '5-10': 0,
+                '10-15': 0,
+                '15+': 0
+            };
+            
+            calculationsData.forEach(emp => {
+                if (emp.overtime <= 5) {
+                    overtimeRanges['0-5']++;
+                } else if (emp.overtime <= 10) {
+                    overtimeRanges['5-10']++;
+                } else if (emp.overtime <= 15) {
+                    overtimeRanges['10-15']++;
+                } else {
+                    overtimeRanges['15+']++;
+                }
+            });
+            
+            // Destroy existing chart if it exists
+            if (charts.overtimeChart) {
+                charts.overtimeChart.destroy();
+            }
+            
+            // Create new chart
+            charts.overtimeChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(overtimeRanges),
+                    datasets: [{
+                        data: Object.values(overtimeRanges),
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(253, 126, 20, 0.7)',
+                            'rgba(220, 53, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(253, 126, 20, 1)',
+                            'rgba(220, 53, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Employees by Overtime Hours'
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Create payment breakdown chart
+         */
+        function createPaymentChart() {
+            const ctx = document.getElementById('paymentChart').getContext('2d');
+            
+            // Calculate payment breakdown
+            const totalBasePay = payrollData.reduce((sum, p) => sum + p.basePay, 0);
+            const totalOvertimePay = payrollData.reduce((sum, p) => sum + p.overtimePay, 0);
+            const totalAllowances = payrollData.reduce((sum, p) => sum + p.allowances, 0);
+            const totalDeductions = payrollData.reduce((sum, p) => sum + p.deductions, 0);
+            
+            // Destroy existing chart if it exists
+            if (charts.paymentChart) {
+                charts.paymentChart.destroy();
+            }
+            
+            // Create new chart
+            charts.paymentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Base Pay', 'Overtime Pay', 'Allowances', 'Deductions'],
+                    datasets: [{
+                        label: 'Amount ($)',
+                        data: [totalBasePay, totalOvertimePay, totalAllowances, totalDeductions],
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.7)',
+                            'rgba(240, 147, 251, 0.7)',
+                            'rgba(255, 236, 210, 0.7)',
+                            'rgba(220, 53, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(240, 147, 251, 1)',
+                            'rgba(255, 236, 210, 1)',
+                            'rgba(220, 53, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Payment Breakdown'
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Update the employees view
+         */
+        function updateEmployeesView() {
+            // Set filtered data to all calculations data initially
+            filteredEmployeeData = [...calculationsData];
+            
+            // Update department filter options
+            const deptFilter = document.getElementById('employeeDepartmentFilter');
+            const departments = [...new Set(calculationsData.map(emp => emp.department))];
+            
+            // Clear existing options except the first one
+            while (deptFilter.options.length > 1) {
+                deptFilter.remove(1);
+            }
+            
+            // Add department options
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                deptFilter.appendChild(option);
+            });
+            
+            // Update the table
+            updateEmployeeTable();
+        }
+
+        /**
+         * Update the employee table with filtered data
+         */
+        function updateEmployeeTable() {
+            const tableBody = document.getElementById('employeesTableBody');
+            tableBody.innerHTML = '';
+            
+            filteredEmployeeData.forEach(emp => {
+                const row = document.createElement('tr');
+                
+                // Get payroll data for this employee
+                const payroll = payrollData.find(p => p.employeeId === emp.employeeId) || {};
+                
+                // Determine status class
+                let statusClass = '';
+                switch(emp.status) {
+                    case 'Low Utilization':
+                        statusClass = 'status-low-utilization';
+                        break;
+                    case 'Excessive Overtime':
+                        statusClass = 'status-excessive-overtime';
+                        break;
+                    case 'Perfect':
+                        statusClass = 'status-perfect';
+                        break;
+                    case 'Good':
+                        statusClass = 'status-good';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${emp.employeeId}</td>
+                    <td>${emp.department}</td>
+                    <td>${emp.totalHours.toFixed(1)}</td>
+                    <td>${emp.overtime.toFixed(1)}</td>
+                    <td>${emp.utilization.toFixed(1)}%</td>
+                    <td><span class="status-indicator ${statusClass}"></span>${emp.status}</td>
+                    <td>${formatCurrency(payroll.grossPay || 0)}</td>
+                    <td>${formatCurrency(payroll.netPay || 0)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        /**
+         * Filter the employee table based on selected filters
+         */
+        function filterEmployeeTable() {
+            const deptFilter = document.getElementById('employeeDepartmentFilter').value;
+            const statusFilter = document.getElementById('employeeStatusFilter').value;
+            const searchFilter = document.getElementById('employeeSearch').value.toLowerCase();
+            
+            filteredEmployeeData = calculationsData.filter(emp => {
+                // Department filter
+                if (deptFilter && emp.department !== deptFilter) {
+                    return false;
+                }
+                
+                // Status filter
+                if (statusFilter && emp.status !== statusFilter) {
+                    return false;
+                }
+                
+                // Search filter
+                if (searchFilter && !emp.employeeId.toLowerCase().includes(searchFilter) && 
+                    !emp.department.toLowerCase().includes(searchFilter)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            updateEmployeeTable();
+        }
+
+        /**
+         * Update the payroll view
+         */
+        function updatePayrollView() {
+            // Set filtered data to all payroll data initially
+            filteredPayrollData = [...payrollData];
+            
+            // Update department filter options
+            const deptFilter = document.getElementById('payrollDepartmentFilter');
+            const departments = [...new Set(payrollData.map(p => p.department))];
+            
+            // Clear existing options except the first one
+            while (deptFilter.options.length > 1) {
+                deptFilter.remove(1);
+            }
+            
+            // Add department options
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                deptFilter.appendChild(option);
+            });
+            
+            // Update payroll summary
+            updatePayrollSummary();
+            
+            // Update the table
+            updatePayrollTable();
+        }
+
+        /**
+         * Update payroll summary cards
+         */
+        function updatePayrollSummary() {
+            const totalGross = filteredPayrollData.reduce((sum, p) => sum + p.grossPay, 0);
+            const totalDeductions = filteredPayrollData.reduce((sum, p) => sum + p.deductions, 0);
+            const totalNet = filteredPayrollData.reduce((sum, p) => sum + p.netPay, 0);
+            const totalHours = filteredPayrollData.reduce((sum, p) => sum + p.regularHours + p.overtimeHours, 0);
+            const avgRate = totalHours > 0 ? totalGross / totalHours : 0;
+            
+            document.getElementById('payrollTotalGross').textContent = formatCurrency(totalGross);
+            document.getElementById('payrollTotalDeductions').textContent = formatCurrency(totalDeductions);
+            document.getElementById('payrollTotalNet').textContent = formatCurrency(totalNet);
+            document.getElementById('payrollAvgRate').textContent = formatCurrency(avgRate);
+        }
+
+        /**
+         * Update the payroll table with filtered data
+         */
+        function updatePayrollTable() {
+            const tableBody = document.getElementById('payrollTableBody');
+            tableBody.innerHTML = '';
+            
+            filteredPayrollData.forEach(p => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${p.employeeId}</td>
+                    <td>${p.date}</td>
+                    <td>${p.regularHours.toFixed(1)}</td>
+                    <td>${p.overtimeHours.toFixed(1)}</td>
+                    <td>${formatCurrency(p.basePay)}</td>
+                    <td>${formatCurrency(p.overtimePay)}</td>
+                    <td>${formatCurrency(p.allowances)}</td>
+                    <td>${formatCurrency(p.grossPay)}</td>
+                    <td>${formatCurrency(p.deductions)}</td>
+                    <td><strong>${formatCurrency(p.netPay)}</strong></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        /**
+         * Filter the payroll table based on selected filters
+         */
+        function filterPayrollTable() {
+            const deptFilter = document.getElementById('payrollDepartmentFilter').value;
+            const dateFilter = document.getElementById('payrollDateFilter').value;
+            const employeeFilter = document.getElementById('payrollEmployeeFilter').value.toLowerCase();
+            const amountFilter = parseFloat(document.getElementById('payrollAmountFilter').value) || 0;
+            
+            filteredPayrollData = payrollData.filter(p => {
+                // Department filter
+                if (deptFilter && p.department !== deptFilter) {
+                    return false;
+                }
+                
+                // Date filter
+                if (dateFilter && p.date !== dateFilter) {
+                    return false;
+                }
+                
+                // Employee filter
+                if (employeeFilter && !p.employeeId.toLowerCase().includes(employeeFilter)) {
+                    return false;
+                }
+                
+                // Amount filter
+                if (amountFilter && p.netPay < amountFilter) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            updatePayrollSummary();
+            updatePayrollTable();
+        }
+
+        /**
+         * Update the reports view
+         */
+        function updateReportsView() {
+            updateDepartmentSummary();
+            updateShiftSummary();
+        }
+
+        /**
+         * Update department summary table
+         */
+        function updateDepartmentSummary() {
+            const tableBody = document.getElementById('departmentSummaryBody');
+            tableBody.innerHTML = '';
+            
+            // Group data by department
+            const deptSummary = {};
+            calculationsData.forEach(emp => {
+                if (!deptSummary[emp.department]) {
+                    deptSummary[emp.department] = {
+                        employees: 0,
+                        totalHours: 0,
+                        totalCost: 0
+                    };
+                }
+                
+                deptSummary[emp.department].employees++;
+                deptSummary[emp.department].totalHours += emp.totalHours;
+                
+                // Add payroll cost
+                const payroll = payrollData.find(p => p.employeeId === emp.employeeId);
+                if (payroll) {
+                    deptSummary[emp.department].totalCost += payroll.grossPay;
+                }
+            });
+            
+            // Add rows to table
+            Object.keys(deptSummary).forEach(dept => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${dept}</td>
+                    <td>${deptSummary[dept].employees}</td>
+                    <td>${deptSummary[dept].totalHours.toFixed(1)}</td>
+                    <td>${formatCurrency(deptSummary[dept].totalCost)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        /**
+         * Update shift summary table
+         */
+        function updateShiftSummary() {
+            const tableBody = document.getElementById('shiftSummaryBody');
+            tableBody.innerHTML = '';
+            
+            // Calculate shift summaries (simplified)
+            const dayHours = calculationsData.reduce((sum, emp) => sum + (emp.totalHours - emp.nightHours), 0);
+            const nightHours = calculationsData.reduce((sum, emp) => sum + emp.nightHours, 0);
+            const weekendHours = calculationsData.reduce((sum, emp) => sum + emp.weekendHours, 0);
+            
+            // Calculate costs for each shift type
+            const dayCost = payrollData.reduce((sum, p) => {
+                const emp = calculationsData.find(e => e.employeeId === p.employeeId);
+                if (emp) {
+                    const dayRatio = (emp.totalHours - emp.nightHours) / emp.totalHours;
+                    return sum + (p.grossPay * dayRatio);
+                }
+                return sum;
+            }, 0);
+            
+            const nightCost = payrollData.reduce((sum, p) => {
+                const emp = calculationsData.find(e => e.employeeId === p.employeeId);
+                if (emp) {
+                    const nightRatio = emp.nightHours / emp.totalHours;
+                    return sum + (p.grossPay * nightRatio);
+                }
+                return sum;
+            }, 0);
+            
+            const weekendCost = payrollData.reduce((sum, p) => {
+                const emp = calculationsData.find(e => e.employeeId === p.employeeId);
+                if (emp) {
+                    const weekendRatio = emp.weekendHours / emp.totalHours;
+                    return sum + (p.grossPay * weekendRatio);
+                }
+                return sum;
+            }, 0);
+            
+            // Calculate employees per shift type (simplified)
+            const dayEmployees = calculationsData.filter(emp => emp.totalHours - emp.nightHours > 0).length;
+            const nightEmployees = calculationsData.filter(emp => emp.nightHours > 0).length;
+            const weekendEmployees = calculationsData.filter(emp => emp.weekendHours > 0).length;
+            
+            // Calculate average rates
+            const dayRate = dayHours > 0 ? dayCost / dayHours : 0;
+            const nightRate = nightHours > 0 ? nightCost / nightHours : 0;
+            const weekendRate = weekendHours > 0 ? weekendCost / weekendHours : 0;
+            
+            // Add rows to table
+            const shifts = [
+                { type: 'Day', hours: dayHours, employees: dayEmployees, rate: dayRate },
+                { type: 'Night', hours: nightHours, employees: nightEmployees, rate: nightRate },
+                { type: 'Weekend', hours: weekendHours, employees: weekendEmployees, rate: weekendRate }
+            ];
+            
+            shifts.forEach(shift => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${shift.type}</td>
+                    <td>${shift.hours.toFixed(1)}</td>
+                    <td>${shift.employees}</td>
+                    <td>${formatCurrency(shift.rate)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        /**
+         * Export data to CSV
+         */
+        function exportToCSV(type) {
+            let data = [];
+            let filename = '';
+            
+            switch(type) {
+                case 'employees':
+                    data = calculationsData;
+                    filename = 'employees.csv';
+                    break;
+                case 'payroll':
+                    data = payrollData;
+                    filename = 'payroll.csv';
+                    break;
+                case 'summary':
+                    // Create summary data
+                    data = calculationsData.map(emp => {
+                        const payroll = payrollData.find(p => p.employeeId === emp.employeeId) || {};
+                        return {
+                            employeeId: emp.employeeId,
+                            department: emp.department,
+                            totalHours: emp.totalHours,
+                            overtime: emp.overtime,
+                            utilization: emp.utilization,
+                            status: emp.status,
+                            grossPay: payroll.grossPay || 0,
+                            netPay: payroll.netPay || 0
+                        };
+                    });
+                    filename = 'summary.csv';
+                    break;
+            }
+            
+            if (data.length === 0) {
+                alert('No data available to export!');
+                return;
+            }
+            
+            // Convert to CSV
+            const headers = Object.keys(data[0]);
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => headers.map(header => JSON.stringify(row[header] || '')).join(','))
+            ].join('\n');
+            
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        /**
+         * Export to PDF (simplified - in a real app, use a PDF library)
+         */
+        function exportToPDF() {
+            alert('PDF export would be implemented with a library like jsPDF in a production environment.');
+            // In a real implementation, we would use jsPDF to generate a PDF report
+        }
+
+        /**
+         * Show a specific view and hide others
+         */
+        function showView(viewName, event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected view
+            document.getElementById(viewName + 'View').style.display = 'block';
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            if (event) {
+                event.target.classList.add('active');
+            }
+        }
+
+        /**
+         * Show the settings modal
+         */
+        function showSettingsModal() {
+            updateSettingsForm();
+            const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            modal.show();
+        }
+
+        /**
+         * Update the settings form with current values
+         */
+        function updateSettingsForm() {
+            Object.keys(settingsData).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = settingsData[key];
+                }
+            });
+        }
+
+        /**
+         * Save settings from the form
+         */
+        function saveSettings() {
+            // Get all form values
+            const form = document.getElementById('settingsForm');
+            const formData = new FormData(form);
+            
+            // Update settings
+            formData.forEach((value, key) => {
+                // Convert to number if possible
+                if (!isNaN(value) && value !== '') {
+                    settingsData[key] = Number(value);
+                } else {
+                    settingsData[key] = value;
+                }
+            });
+            
+            // Recalculate data with new settings
+            if (biometricData.length > 0) {
+                calculationsData = calculateFromBiometric(biometricData);
+                payrollData = calculatePayroll(calculationsData);
+                
+                // Update all views
+                updateDashboard();
+                updateEmployeesView();
+                updatePayrollView();
+                updateReportsView();
+            }
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+            modal.hide();
+            
+            // Show success message
+            showSuccessMessage('Settings saved successfully!');
+        }
+
+        /**
+         * Format currency based on settings
+         */
+        function formatCurrency(amount) {
+            const currency = settingsData.currency || 'USD';
+            const symbols = {
+                'USD': '$',
+                'EUR': '€',
+                'GBP': '£',
+                'CAD': '$',
+                'AUD': '$'
+            };
+            
+            const symbol = symbols[currency] || '$';
+            return `${symbol}${amount.toFixed(2)}`;
+        }
+
+        /**
+         * Show loading overlay
+         */
+        function showLoading(show) {
+            document.querySelector('.loading-overlay').style.display = show ? 'flex' : 'none';
+        }
+
+        /**
+         * Show success message
+         */
+        function showSuccessMessage(message) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed';
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '9999';
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-check-circle"></i> ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Show toast
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toast);
+            });
+        }
+
+        /**
+         * Download a sample Excel file
+         */
+        function downloadSampleFile() {
+            // Create sample data
+            const sampleData = [
+                { EmployeeID: 'EMP001', Department: 'Sales', Date: '2023-10-01', Hours: 8, ShiftType: 'Day' },
+                { EmployeeID: 'EMP002', Department: 'Marketing', Date: '2023-10-01', Hours: 7.5, ShiftType: 'Day' },
+                { EmployeeID: 'EMP003', Department: 'IT', Date: '2023-10-01', Hours: 9, ShiftType: 'Night' },
+                { EmployeeID: 'EMP001', Department: 'Sales', Date: '2023-10-02', Hours: 8.5, ShiftType: 'Day' },
+                { EmployeeID: 'EMP002', Department: 'Marketing', Date: '2023-10-02', Hours: 7, ShiftType: 'Day' },
+                { EmployeeID: 'EMP003', Department: 'IT', Date: '2023-10-02', Hours: 8, ShiftType: 'Night' }
+            ];
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(sampleData);
+            XLSX.utils.book_append_sheet(wb, ws, 'BiometricData');
+            
+            // Create settings sheet
+            const settings = [
+                { Setting: 'expectedHours', Value: 7.5 },
+                { Setting: 'hourlyRate', Value: 25.0 },
+                { Setting: 'overtimeMultiplier', Value: 1.5 }
+            ];
+            const settingsWs = XLSX.utils.json_to_sheet(settings);
+            XLSX.utils.book_append_sheet(wb, settingsWs, 'Settings');
+            
+            // Download
+            XLSX.writeFile(wb, 'ShiftGuard_Sample_Data.xlsx');
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default settings
+            settingsData = { ...DEFAULT_SETTINGS };
+            
+            // Show dashboard by default
+            showView('dashboard');
+            
+            // Add event listener for file input change
+            document.getElementById('excelFile').addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    document.querySelector('#uploadSection .btn-primary').disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
