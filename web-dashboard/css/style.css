@@ -1,0 +1,324 @@
+/* ShiftGuard Dashboard Styles */
+
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #0dcaf0;
+    --dark-color: #212529;
+    --light-color: #f8f9fa;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Navbar Styles */
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.navbar-brand i {
+    margin-right: 8px;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px);
+}
+
+/* KPI Card Styles */
+.kpi-card {
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.kpi-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+}
+
+.kpi-icon.bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.kpi-icon.bg-success {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.kpi-icon.bg-warning {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.kpi-icon.bg-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 20px;
+}
+
+/* Table Styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: var(--light-color);
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: var(--dark-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Metric List Styles */
+.metric-list {
+    padding: 0;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.metric-item:last-child {
+    border-bottom: none;
+}
+
+.metric-item span {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.metric-item strong {
+    color: var(--dark-color);
+    font-size: 1.1rem;
+}
+
+/* Chart Container */
+canvas {
+    max-height: 300px;
+}
+
+/* Upload Section */
+#uploadSection .card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+#uploadSection .card-title,
+#uploadSection .text-muted {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+#uploadSection .form-control {
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+#uploadSection .form-control:focus {
+    border-color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+#uploadSection .form-control::file-selector-button {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    margin-right: 10px;
+    border-radius: 6px;
+}
+
+#uploadSection .btn-primary {
+    background-color: white;
+    color: #667eea;
+    border: none;
+    font-weight: 600;
+}
+
+#uploadSection .btn-primary:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+/* View Sections */
+.view-section {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Button Group */
+.btn-group .btn {
+    margin-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .kpi-card h3 {
+        font-size: 1.5rem;
+    }
+
+    .kpi-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    canvas {
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .nav-link {
+        font-size: 0.9rem;
+    }
+
+    .kpi-card {
+        margin-bottom: 15px;
+    }
+
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btn-group .btn {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+}
+
+/* Loading Spinner */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 12px;
+    border: none;
+}
+
+/* Status Badges */
+.badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Utility Classes */
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.rounded-lg {
+    border-radius: 12px !important;
+}
+
+/* Custom Scrollbar */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    #uploadSection,
+    .btn-group {
+        display: none !important;
+    }
+
+    .card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+
+    body {
+        background-color: white;
+    }
+}
