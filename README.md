@@ -1,4 +1,4 @@
-AI TASK: CREATE SHIFTGUARD EMPLOYEE TRACKING SYSTEM
+CREATE SHIFTGUARD EMPLOYEE TRACKING SYSTEM
 
 OBJECTIVE: Create a complete, downloadable ZIP package for an Excel-based employee time tracking system with VBA macros and Power BI integration.
 
