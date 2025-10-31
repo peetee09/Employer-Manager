@@ -2050,6 +2050,17 @@
             
             container.innerHTML = '';
             
+            // Get currency symbol
+            const currencySymbols = {
+                'ZAR': 'R',
+                'USD': '$',
+                'EUR': '€',
+                'GBP': '£',
+                'CAD': '$',
+                'AUD': '$'
+            };
+            const currencySymbol = currencySymbols[settingsData.currency || 'ZAR'] || 'R';
+            
             rolesData.forEach((role, index) => {
                 const roleDiv = document.createElement('div');
                 roleDiv.className = 'card mb-2';
@@ -2064,7 +2075,7 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="input-group input-group-sm">
-                                    <span class="input-group-text">R</span>
+                                    <span class="input-group-text">${currencySymbol}</span>
                                     <input type="number" step="0.01" class="form-control form-control-sm" 
                                            value="${role.hourlyRate}" 
                                            onchange="updateRole(${index}, 'hourlyRate', parseFloat(this.value))"
@@ -2102,6 +2113,7 @@
                 expectedHours: 7.5
             });
             renderRoles();
+            saveRolesToStorage();
         }
 
         /**
@@ -2110,6 +2122,7 @@
         function updateRole(index, field, value) {
             if (rolesData[index]) {
                 rolesData[index][field] = value;
+                saveRolesToStorage();
             }
         }
 
@@ -2120,6 +2133,7 @@
             if (confirm('Are you sure you want to remove this role?')) {
                 rolesData.splice(index, 1);
                 renderRoles();
+                saveRolesToStorage();
             }
         }
 
