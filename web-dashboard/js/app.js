@@ -197,7 +197,8 @@ function calculatePayroll(data) {
         const basePay = regularHours * settingsData.hourlyRate;
         const overtimePay = overtimeHours * settingsData.hourlyRate * settingsData.overtimeMultiplier;
         const nightAllowance = nightHours * settingsData.hourlyRate * settingsData.nightAllowance;
-        const weekendAllowance = isWeekend ? regularHours * settingsData.hourlyRate * settingsData.weekendAllowance : 0;
+        const totalWorkedHours = regularHours + overtimeHours;
+        const weekendAllowance = isWeekend ? totalWorkedHours * settingsData.hourlyRate * settingsData.weekendAllowance : 0;
         
         const grossPay = basePay + overtimePay + nightAllowance + weekendAllowance;
         
@@ -539,15 +540,36 @@ function updateEmployeesView() {
         const payroll = empPayroll[empId] || { gross: 0, net: 0 };
         
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${empId}</strong></td>
-            <td>${data.dept}</td>
-            <td>${data.hours.toFixed(1)} hrs</td>
-            <td>${data.overtime.toFixed(1)} hrs</td>
-            <td>${avgUtil.toFixed(1)}%</td>
-            <td>${formatCurrency(payroll.gross)}</td>
-            <td>${formatCurrency(payroll.net)}</td>
-        `;
+        const tdEmpId = document.createElement('td');
+        tdEmpId.innerHTML = '<strong></strong>';
+        tdEmpId.querySelector('strong').textContent = empId;
+        
+        const tdDept = document.createElement('td');
+        tdDept.textContent = data.dept;
+        
+        const tdHours = document.createElement('td');
+        tdHours.textContent = data.hours.toFixed(1) + ' hrs';
+        
+        const tdOT = document.createElement('td');
+        tdOT.textContent = data.overtime.toFixed(1) + ' hrs';
+        
+        const tdUtil = document.createElement('td');
+        tdUtil.textContent = avgUtil.toFixed(1) + '%';
+        
+        const tdGross = document.createElement('td');
+        tdGross.textContent = formatCurrency(payroll.gross);
+        
+        const tdNet = document.createElement('td');
+        tdNet.textContent = formatCurrency(payroll.net);
+        
+        tr.appendChild(tdEmpId);
+        tr.appendChild(tdDept);
+        tr.appendChild(tdHours);
+        tr.appendChild(tdOT);
+        tr.appendChild(tdUtil);
+        tr.appendChild(tdGross);
+        tr.appendChild(tdNet);
+        
         tbody.appendChild(tr);
     });
 }
@@ -574,18 +596,32 @@ function updatePayrollView() {
     
     payrollData.forEach(row => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${row['Employee ID']}</strong></td>
-            <td>${row['Date']}</td>
-            <td>${row['Regular Hours']}</td>
-            <td>${row['Overtime Hours']}</td>
-            <td>${formatCurrency(row['Base Pay'])}</td>
-            <td>${formatCurrency(row['Overtime Pay'])}</td>
-            <td>${formatCurrency(parseFloat(row['Night Allowance']) + parseFloat(row['Weekend Allowance']))}</td>
-            <td>${formatCurrency(row['Gross Pay'])}</td>
-            <td>${formatCurrency(row['Total Deductions'])}</td>
-            <td><strong>${formatCurrency(row['Net Pay'])}</strong></td>
-        `;
+        
+        const cells = [
+            { tag: 'strong', text: row['Employee ID'] },
+            { text: row['Date'] },
+            { text: row['Regular Hours'] },
+            { text: row['Overtime Hours'] },
+            { text: formatCurrency(row['Base Pay']) },
+            { text: formatCurrency(row['Overtime Pay']) },
+            { text: formatCurrency(parseFloat(row['Night Allowance']) + parseFloat(row['Weekend Allowance'])) },
+            { text: formatCurrency(row['Gross Pay']) },
+            { text: formatCurrency(row['Total Deductions']) },
+            { tag: 'strong', text: formatCurrency(row['Net Pay']) }
+        ];
+        
+        cells.forEach(cell => {
+            const td = document.createElement('td');
+            if (cell.tag === 'strong') {
+                const strong = document.createElement('strong');
+                strong.textContent = cell.text;
+                td.appendChild(strong);
+            } else {
+                td.textContent = cell.text;
+            }
+            tr.appendChild(td);
+        });
+        
         tbody.appendChild(tr);
     });
 }
@@ -621,12 +657,26 @@ function updateReportsView() {
     deptBody.innerHTML = '';
     Object.keys(deptSummary).forEach(dept => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${dept}</strong></td>
-            <td>${deptSummary[dept].employees.size}</td>
-            <td>${deptSummary[dept].hours.toFixed(1)} hrs</td>
-            <td>${formatCurrency(deptPayroll[dept] || 0)}</td>
-        `;
+        
+        const tdDept = document.createElement('td');
+        const strongDept = document.createElement('strong');
+        strongDept.textContent = dept;
+        tdDept.appendChild(strongDept);
+        
+        const tdEmp = document.createElement('td');
+        tdEmp.textContent = deptSummary[dept].employees.size;
+        
+        const tdHours = document.createElement('td');
+        tdHours.textContent = deptSummary[dept].hours.toFixed(1) + ' hrs';
+        
+        const tdCost = document.createElement('td');
+        tdCost.textContent = formatCurrency(deptPayroll[dept] || 0);
+        
+        tr.appendChild(tdDept);
+        tr.appendChild(tdEmp);
+        tr.appendChild(tdHours);
+        tr.appendChild(tdCost);
+        
         deptBody.appendChild(tr);
     });
     
@@ -644,11 +694,24 @@ function updateReportsView() {
         shiftSummary[shift].hours += parseFloat(row['Worked Hours'] || 0);
     });
     
+    // Calculate shift payroll
+    const shiftPayroll = {};
+    payrollData.forEach(row => {
+        const shift = calculationsData.find(c => 
+            c['Employee ID'] === row['Employee ID'] && c['Date'] === row['Date']
+        );
+        const shiftType = shift ? shift['Shift Type'] : 'Unknown';
+        if (!shiftPayroll[shiftType]) {
+            shiftPayroll[shiftType] = 0;
+        }
+        shiftPayroll[shiftType] += parseFloat(row['Gross Pay'] || 0);
+    });
+    
     const shiftBody = document.getElementById('shiftSummaryBody');
     shiftBody.innerHTML = '';
     Object.keys(shiftSummary).forEach(shift => {
         const avgRate = shiftSummary[shift].hours > 0 ? 
-            (deptPayroll[shift] || settingsData.hourlyRate * shiftSummary[shift].hours) / shiftSummary[shift].hours : 0;
+            (shiftPayroll[shift] || settingsData.hourlyRate * shiftSummary[shift].hours) / shiftSummary[shift].hours : 0;
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -664,7 +727,7 @@ function updateReportsView() {
 /**
  * Show specific view
  */
-function showView(viewName) {
+function showView(viewName, event) {
     // Hide all views
     document.querySelectorAll('.view-section').forEach(section => {
         section.style.display = 'none';
@@ -681,7 +744,9 @@ function showView(viewName) {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
-    event.target.closest('.nav-link').classList.add('active');
+    if (event && event.target) {
+        event.target.closest('.nav-link').classList.add('active');
+    }
 }
 
 /**
